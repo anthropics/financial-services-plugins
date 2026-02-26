@@ -1,10 +1,9 @@
 ---
 name: check-model
+description: Debug and audit financial models for errors — circular references, broken formulas, hardcoded overrides, balance sheet imbalances, cash flow mismatches, and logic gaps. Use when a model isn't tying, producing unexpected results, or before sending to a client or IC. Triggers on "debug model", "model check", "audit model", "model won't balance", "something's off in my model", "check my model", "QA model", or "model review".
 ---
 
 # Model Checker
-
-description: Debug and audit financial models for errors — circular references, broken formulas, hardcoded overrides, balance sheet imbalances, cash flow mismatches, and logic gaps. Use when a model isn't tying, producing unexpected results, or before sending to a client or IC. Triggers on "debug model", "model check", "audit model", "model won't balance", "something's off in my model", "check my model", "QA model", or "model review".
 
 ## Workflow
 
