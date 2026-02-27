@@ -38,6 +38,26 @@
       "name": "sp-global",
       "source": "./partner-built/spglobal",
       "description": "S&P Global - Financial data and analytics skills including company tearsheets, earnings previews, and transaction summaries"
+    },
+        {
+      "name": "crypto-financial-analysis",
+      "source": "./crypto-financial-analysis",
+      "description": "Core crypto financial analysis workflows: market snapshots, token tearsheets, structured assumptions, and reusable reporting templates."
+    },
+    {
+      "name": "crypto-signal-engine",
+      "source": "./crypto-signal-engine",
+      "description": "Crypto signal generation workflows: indicators, model edge + confidence, signal scoring, and standardized trade-intent outputs."
+    },
+    {
+      "name": "crypto-risk-engine",
+      "source": "./crypto-risk-engine",
+      "description": "Risk control workflows for crypto trading: volatility-aware sizing, ATR-based stops, drawdown guards, and stress checks."
+    },
+    {
+      "name": "crypto-portfolio-management",
+      "source": "./crypto-portfolio-management",
+      "description": "Portfolio workflows for crypto: exposure tracking, rebalancing rules, performance attribution, and investor-ready reporting."
     }
   ]
 }

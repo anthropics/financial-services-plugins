@@ -1,0 +1,8 @@
+{
+  "name": "crypto-portfolio-management",
+  "version": "0.1.0",
+  "description": "Portfolio workflows for crypto: exposure tracking, rebalancing rules, performance attribution, and investor-ready reporting.",
+  "author": {
+    "name": "Tsknefe"
+  }
+}

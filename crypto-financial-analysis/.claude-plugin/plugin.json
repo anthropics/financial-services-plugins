@@ -1,0 +1,8 @@
+{
+  "name": "crypto-financial-analysis",
+  "version": "0.1.0",
+  "description": "Core crypto financial analysis workflows: market snapshots, token tearsheets, structured assumptions, and reusable reporting templates.",
+  "author": {
+    "name": "Tsknefe"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "crypto-risk-engine",
+  "version": "0.1.0",
+  "description": "Risk control workflows for crypto trading: volatility-aware sizing, ATR-based stops, drawdown guards, and stress checks.",
+  "author": {
+    "name": "Tsknefe"
+  }
+}
