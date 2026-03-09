@@ -24,7 +24,7 @@ from typing import Optional
 class NumberInstance:
     """A numerical value found in the presentation."""
     value: str           # Original string representation
-    normalized: float    # Normalized numeric value
+    normalized: Optional[float]  # Normalized numeric value (None if unparseable)
     unit: str           # Detected unit (M, B, K, %, bps, x, etc.)
     slide: int          # Slide number (0 if unknown)
     context: str        # Surrounding text for context
@@ -32,15 +32,19 @@ class NumberInstance:
     category: str       # Detected category (revenue, margin, multiple, etc.)
 
 
-def normalize_number(value_str: str, unit: str) -> float:
-    """Convert a number string with unit to a normalized float value."""
+def normalize_number(value_str: str, unit: str) -> Optional[float]:
+    """Convert a number string with unit to a normalized float value.
+
+    Returns None if the value cannot be parsed, rather than 0.0,
+    to avoid silently converting invalid data into meaningful financial values.
+    """
     # Remove commas and spaces
     clean = re.sub(r'[,\s]', '', value_str)
 
     try:
         base_value = float(clean)
     except ValueError:
-        return 0.0
+        return None
 
     # Apply unit multipliers
     multipliers = {
@@ -168,6 +172,9 @@ def extract_numbers(content: str) -> list[NumberInstance]:
                     unit = f"USD_{unit}"
 
             normalized = normalize_number(value_str, unit)
+            if normalized is None:
+                continue
+
             category = detect_category(context, unit)
 
             numbers.append(NumberInstance(
@@ -204,7 +211,7 @@ def find_inconsistencies(numbers: list[NumberInstance]) -> list[dict]:
             placed = False
             for group in value_groups:
                 ref_value = group[0].normalized
-                if ref_value > 0:
+                if ref_value is not None and inst.normalized is not None and ref_value > 0:
                     diff_pct = abs(inst.normalized - ref_value) / ref_value
                     if diff_pct < 0.05:  # 5% tolerance
                         group.append(inst)
