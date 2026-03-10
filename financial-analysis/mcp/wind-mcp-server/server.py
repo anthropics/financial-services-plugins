@@ -25,7 +25,6 @@ logger = logging.getLogger(__name__)
 
 mcp = FastMCP(
     "Wind Financial Terminal",
-    version="1.1.0",
 )
 
 # ---------------------------------------------------------------------------
