@@ -82,13 +82,22 @@ def _get_db() -> sqlite3.Connection:
     return conn
 
 
+_cleanup_counter = 0
+
+
 def _record_usage(api: str, usage_amt: int, codes: str = "", fields: str = "", detail: str = ""):
-    """Insert one usage record."""
+    """Insert one usage record and periodically purge expired rows."""
+    global _cleanup_counter
     conn = _get_db()
     conn.execute(
         "INSERT INTO api_usage (api, ts, usage_amt, codes, fields, detail) VALUES (?, ?, ?, ?, ?, ?)",
         (api, datetime.now().isoformat(), usage_amt, codes, fields, detail),
     )
+    # Purge records older than 8 days (beyond the longest 7-day window) every 50 calls
+    _cleanup_counter += 1
+    if _cleanup_counter % 50 == 0:
+        cutoff = (datetime.now() - timedelta(days=8)).isoformat()
+        conn.execute("DELETE FROM api_usage WHERE ts < ?", (cutoff,))
     conn.commit()
     conn.close()
 
