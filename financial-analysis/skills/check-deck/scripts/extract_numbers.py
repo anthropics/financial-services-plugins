@@ -121,7 +121,7 @@ def extract_numbers(content: str) -> list[NumberInstance]:
         r'\s*'
         r'(?P<unit>%|bps|x|'  # Common units
         r'[Tt]rillion|[Bb]illion|[Mm]illion|[Tt]housand|'  # Full words
-        r'[TBMKtbmk]n?|mm|MM)?'  # Abbreviations
+        r'mm|MM|[TBMKtbmk]n?)?'  # Abbreviations (mm/MM before char class so 'mm' isn't split)
         r'(?!\d)'  # Negative lookahead to avoid partial matches
     )
 
