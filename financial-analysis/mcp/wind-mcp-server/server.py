@@ -12,9 +12,11 @@ Requirements:
 """
 
 import json
-import sys
+import sqlite3
 import logging
+import os
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -23,8 +25,100 @@ logger = logging.getLogger(__name__)
 
 mcp = FastMCP(
     "Wind Financial Terminal",
-    version="1.0.0",
+    version="1.1.0",
 )
+
+# ---------------------------------------------------------------------------
+# API quota definitions (from Wind API数据量说明)
+#
+# unit_type: how usage is counted
+#   "cells"       — codes × fields × time_points
+#   "codes"       — number of security codes per call
+#   "indicators"  — number of EDB indicator codes per call
+#
+# window_hours: rolling window for quota reset
+# limit: max usage within the window
+# ---------------------------------------------------------------------------
+
+API_QUOTAS = {
+    "wsd":  {"limit": 5_000_000, "window_hours": 168, "unit_type": "cells",      "unit_label": "单元格"},
+    "wss":  {"limit": 5_000_000, "window_hours": 168, "unit_type": "cells",      "unit_label": "单元格"},
+    "wset": {"limit": 5_000_000, "window_hours": 168, "unit_type": "cells",      "unit_label": "单元格"},
+    "wsq":  {"limit": 5_000,     "window_hours": 24,  "unit_type": "codes",      "unit_label": "品种个数"},
+    "wsi":  {"limit": 5_000,     "window_hours": 24,  "unit_type": "codes",      "unit_label": "品种个数"},
+    "wst":  {"limit": 5_000,     "window_hours": 24,  "unit_type": "codes",      "unit_label": "品种个数"},
+    "edb":  {"limit": 2_000,     "window_hours": 168, "unit_type": "indicators", "unit_label": "指标数"},
+    "wpf":  {"limit": 0,         "window_hours": 24,  "unit_type": "calls",      "unit_label": "次"},  # no documented limit
+}
+
+# ---------------------------------------------------------------------------
+# SQLite usage tracker
+# ---------------------------------------------------------------------------
+
+_DB_PATH = os.environ.get(
+    "WIND_USAGE_DB",
+    str(Path(__file__).parent / "wind_usage.db"),
+)
+
+
+def _get_db() -> sqlite3.Connection:
+    """Get (and lazily initialize) the SQLite connection."""
+    conn = sqlite3.connect(_DB_PATH)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS api_usage (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            api        TEXT    NOT NULL,
+            ts         TEXT    NOT NULL,
+            usage_amt  INTEGER NOT NULL,
+            codes      TEXT,
+            fields     TEXT,
+            detail     TEXT
+        )
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_api_ts ON api_usage (api, ts)
+    """)
+    conn.commit()
+    return conn
+
+
+def _record_usage(api: str, usage_amt: int, codes: str = "", fields: str = "", detail: str = ""):
+    """Insert one usage record."""
+    conn = _get_db()
+    conn.execute(
+        "INSERT INTO api_usage (api, ts, usage_amt, codes, fields, detail) VALUES (?, ?, ?, ?, ?, ?)",
+        (api, datetime.now().isoformat(), usage_amt, codes, fields, detail),
+    )
+    conn.commit()
+    conn.close()
+
+
+def _query_usage(api: str, window_hours: int) -> int:
+    """Sum usage for *api* within the rolling window."""
+    conn = _get_db()
+    cutoff = (datetime.now() - timedelta(hours=window_hours)).isoformat()
+    row = conn.execute(
+        "SELECT COALESCE(SUM(usage_amt), 0) FROM api_usage WHERE api = ? AND ts >= ?",
+        (api, cutoff),
+    ).fetchone()
+    conn.close()
+    return row[0]
+
+
+def _estimate_cells(raw) -> int:
+    """Estimate the number of cells returned by a Wind API call."""
+    if raw.ErrorCode != 0:
+        return 0
+    n_fields = len(raw.Fields) if raw.Fields else 0
+    n_times = len(raw.Times) if raw.Times else 1
+    n_codes = len(raw.Codes) if raw.Codes else 1
+    return n_codes * n_fields * n_times
+
+
+def _count_codes(codes_str: str) -> int:
+    """Count comma-separated codes."""
+    return len([c for c in codes_str.split(",") if c.strip()])
+
 
 # ---------------------------------------------------------------------------
 # Wind connection management
@@ -122,6 +216,7 @@ def wind_wsd(
     """
     w = _wind()
     raw = w.wsd(codes, fields, begin_date, end_date, options)
+    _record_usage("wsd", _estimate_cells(raw), codes, fields, f"{begin_date}~{end_date}")
     return json.dumps(_format_wind_data(raw), ensure_ascii=False)
 
 
@@ -152,6 +247,7 @@ def wind_wss(
     """
     w = _wind()
     raw = w.wss(codes, fields, options)
+    _record_usage("wss", _estimate_cells(raw), codes, fields)
     return json.dumps(_format_wind_data(raw), ensure_ascii=False)
 
 
@@ -182,6 +278,7 @@ def wind_wset(
     """
     w = _wind()
     raw = w.wset(report_name, options)
+    _record_usage("wset", _estimate_cells(raw), report_name, "", options)
     return json.dumps(_format_wind_data(raw), ensure_ascii=False)
 
 
@@ -214,6 +311,7 @@ def wind_edb(
     """
     w = _wind()
     raw = w.edb(codes, begin_date, end_date, options)
+    _record_usage("edb", _count_codes(codes), codes, "", f"{begin_date}~{end_date}")
     return json.dumps(_format_wind_data(raw), ensure_ascii=False)
 
 
@@ -239,6 +337,7 @@ def wind_wsi(
     """
     w = _wind()
     raw = w.wsi(codes, fields, begin_time, end_time, options)
+    _record_usage("wsi", _count_codes(codes), codes, fields, f"{begin_time}~{end_time}")
     return json.dumps(_format_wind_data(raw), ensure_ascii=False)
 
 
@@ -264,6 +363,7 @@ def wind_wst(
     """
     w = _wind()
     raw = w.wst(codes, fields, begin_time, end_time, options)
+    _record_usage("wst", _count_codes(codes), codes, fields, f"{begin_time}~{end_time}")
     return json.dumps(_format_wind_data(raw), ensure_ascii=False)
 
 
@@ -296,6 +396,7 @@ def wind_wsq(
     """
     w = _wind()
     raw = w.wsq(codes, fields, options)
+    _record_usage("wsq", _count_codes(codes), codes, fields)
     return json.dumps(_format_wind_data(raw), ensure_ascii=False)
 
 
@@ -316,7 +417,77 @@ def wind_wpf(
     """
     w = _wind()
     raw = w.wpf(portfolio_name, fields, options)
+    _record_usage("wpf", 1, portfolio_name, fields)
     return json.dumps(_format_wind_data(raw), ensure_ascii=False)
+
+
+# ---------------------------------------------------------------------------
+# Usage query tool
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def wind_usage(
+    api: str = "",
+) -> str:
+    """Query Wind API usage statistics and remaining quota (查询API用量).
+
+    Call this to check how much API quota has been consumed and how much
+    remains before hitting Wind's rate limits. Helps avoid exceeding limits
+    during large batch analyses.
+
+    Args:
+        api: Optional — specific API to query (e.g. "wsd", "wsq", "edb").
+            Leave empty to get usage summary for ALL APIs.
+    """
+    apis = [api] if api else list(API_QUOTAS.keys())
+    summary = []
+
+    for name in apis:
+        quota = API_QUOTAS.get(name)
+        if not quota:
+            summary.append({"api": name, "error": f"Unknown API: {name}"})
+            continue
+
+        used = _query_usage(name, quota["window_hours"])
+        limit = quota["limit"]
+        remaining = max(0, limit - used)
+        pct = (used / limit * 100) if limit > 0 else 0
+
+        entry = {
+            "api": name,
+            "used": used,
+            "limit": limit,
+            "remaining": remaining,
+            "usage_pct": round(pct, 1),
+            "unit": quota["unit_label"],
+            "window": f"{quota['window_hours']}h",
+        }
+
+        if pct >= 90:
+            entry["warning"] = "接近用量上限，请注意控制调用频率"
+        elif pct >= 70:
+            entry["notice"] = "用量已超过70%"
+
+        summary.append(entry)
+
+    # Also include recent call log (last 20 calls)
+    conn = _get_db()
+    recent = conn.execute(
+        "SELECT api, ts, usage_amt, codes, detail FROM api_usage ORDER BY id DESC LIMIT 20"
+    ).fetchall()
+    conn.close()
+
+    recent_calls = [
+        {"api": r[0], "time": r[1], "usage": r[2], "codes": r[3], "detail": r[4]}
+        for r in recent
+    ]
+
+    return json.dumps(
+        {"quota_summary": summary, "recent_calls": recent_calls},
+        ensure_ascii=False,
+        indent=2,
+    )
 
 
 # ---------------------------------------------------------------------------

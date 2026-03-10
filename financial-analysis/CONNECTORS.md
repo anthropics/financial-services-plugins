@@ -18,6 +18,7 @@ The Wind MCP server is a stdio-based local server that requires Wind Financial T
 | Intraday Bars | `wind_wsi` | Minute-level OHLCV bars for intraday analysis |
 | Tick Data | `wind_wst` | Tick-by-tick trade data for microstructure analysis |
 | Portfolio | `wind_wpf` | Portfolio holdings, NAV, and return data |
+| **Usage Query** | **`wind_usage`** | **Query API quota consumption and remaining limits** |
 
 ## Complete Tool Reference
 
@@ -74,6 +75,31 @@ Retrieve individual trade records with price, volume, and order book snapshots. 
 
 ### Portfolio Data — `wind_wpf`
 Query portfolio data from Wind Portfolio Manager. Retrieve holdings, weights, market values, and NAV history.
+
+### Usage Query — `wind_usage`
+Check API quota consumption and remaining limits. Every Wind API call is automatically tracked in a local SQLite database. Call `wind_usage` to see a summary of usage vs limits, plus recent call history.
+
+**Key parameters:**
+- `api`: Optional — specific API name (e.g., "wsd", "wsq"). Leave empty for all APIs.
+
+**Returns:**
+- Per-API: used amount, limit, remaining, usage percentage, time window
+- Warning flags when usage exceeds 70% or 90%
+- Last 20 API call records with timestamps and parameters
+
+## API Rate Limits (普通版)
+
+| API | Limit | Window | Unit |
+|-----|-------|--------|------|
+| WSD | 5,000,000 | 7×24h | 单元格 (codes × fields × dates) |
+| WSS | 5,000,000 | 7×24h | 单元格 (codes × fields) |
+| WSET | 5,000,000 | 7×24h | 单元格 |
+| WSQ | 5,000 | 24h | 品种个数 |
+| WSI | 5,000 | 24h | 品种个数 |
+| WST | 5,000 | 24h | 品种个数 |
+| EDB | 2,000 | 7×24h | 指标数 |
+
+Usage data is stored in `wind_usage.db` (SQLite) in the MCP server directory. Set `WIND_USAGE_DB` environment variable to customize the path.
 
 ## Security Code Format
 
