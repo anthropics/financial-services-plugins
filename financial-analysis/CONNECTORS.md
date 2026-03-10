@@ -14,6 +14,7 @@ The Wind MCP server is a stdio-based local server that requires Wind Financial T
 | Snapshot Data | `wind_wss` | Cross-sectional data: latest multiples, fundamentals for multiple securities |
 | Dataset Queries | `wind_wset` | Structured datasets: index constituents, IPO data, sector lists |
 | Macro Economics | `wind_edb` | Economic database: GDP, CPI, PMI, monetary policy, trade, FX |
+| Real-time Quotes | `wind_wsq` | Live market data: price, bid/ask, volume, VWAP, market cap |
 | Intraday Bars | `wind_wsi` | Minute-level OHLCV bars for intraday analysis |
 | Tick Data | `wind_wst` | Tick-by-tick trade data for microstructure analysis |
 | Portfolio | `wind_wpf` | Portfolio holdings, NAV, and return data |
@@ -50,6 +51,20 @@ Access China and global macroeconomic indicators. Covers national accounts (GDP)
 **Key parameters:**
 - `codes`: EDB indicator codes (e.g., "M0001228" for GDP, "M0000612" for CPI)
 - `begin_date` / `end_date`: Date range
+
+### Real-time Quotes — `wind_wsq`
+Retrieve a real-time quote snapshot for one or more securities. Returns latest price, bid/ask, volume, turnover, VWAP, limit prices, market cap, and trading status. Ideal for checking current market conditions, monitoring positions, or getting live prices for valuation.
+
+**Key parameters:**
+- `codes`: One or more security codes (e.g., "600519.SH,000858.SZ")
+- `fields`: Real-time fields. Common groups:
+  - Price: `rt_last,rt_open,rt_high,rt_low,rt_pre_close`
+  - Change: `rt_pct_chg,rt_chg,rt_swing`
+  - Volume: `rt_vol,rt_amt,rt_turn`
+  - Bid/Ask: `rt_bid1,rt_ask1,rt_bsize1,rt_asize1` (up to 5 levels)
+  - VWAP: `rt_vwap`
+  - Market cap: `rt_mkt_cap,rt_float_mkt_cap`
+  - Limits: `rt_uplimit,rt_downlimit`
 
 ### Intraday Minute Bars — `wind_wsi`
 Retrieve intraday bar data at configurable intervals (1, 3, 5, 15, 30, 60 min). Useful for intraday pattern analysis and VWAP calculations.

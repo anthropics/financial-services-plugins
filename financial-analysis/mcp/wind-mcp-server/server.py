@@ -268,6 +268,38 @@ def wind_wst(
 
 
 @mcp.tool()
+def wind_wsq(
+    codes: str,
+    fields: str,
+    options: str = "",
+) -> str:
+    """Retrieve real-time quote snapshot from Wind (实时行情数据).
+
+    Use this for live/latest market data: current price, bid/ask, volume,
+    turnover, limit up/down, VWAP, etc. Returns the most recent quote
+    as a one-time snapshot (not a streaming subscription).
+
+    Args:
+        codes: Security codes, comma-separated. Can query multiple securities.
+            Examples: "600519.SH,000858.SZ" or "00700.HK" or "AAPL.O"
+        fields: Real-time quote fields, comma-separated. Common fields:
+            - Price: "rt_last,rt_open,rt_high,rt_low,rt_pre_close"
+            - Change: "rt_pct_chg,rt_chg,rt_swing"
+            - Volume: "rt_vol,rt_amt,rt_turn"
+            - Bid/Ask: "rt_bid1,rt_ask1,rt_bsize1,rt_asize1"
+            - Extended: "rt_bid2,rt_bid3,rt_ask2,rt_ask3" (multi-level quotes)
+            - Limit: "rt_uplimit,rt_downlimit"
+            - VWAP: "rt_vwap"
+            - Market cap: "rt_mkt_cap,rt_float_mkt_cap"
+            - Status: "rt_trade_status,rt_susp_reason"
+        options: Optional parameters
+    """
+    w = _wind()
+    raw = w.wsq(codes, fields, options)
+    return json.dumps(_format_wind_data(raw), ensure_ascii=False)
+
+
+@mcp.tool()
 def wind_wpf(
     portfolio_name: str,
     fields: str,
