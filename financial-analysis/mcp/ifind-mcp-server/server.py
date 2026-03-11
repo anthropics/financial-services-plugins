@@ -428,12 +428,12 @@ def ifind_realtime_quotes(
 
     Args:
         codes: Security codes, comma-separated. Example: "600519.SH,000858.SZ"
-        indicators: Real-time fields, semicolon-separated. Common fields:
+        indicators: Real-time fields, comma-separated. Common fields:
             - "latest" — latest price
-            - "open;high;low;latest" — OHLC
-            - "volume;amount" — trading volume and turnover
-            - "bid1;ask1;bidSize1;askSize1" — best bid/ask
-            - "change;changePer" — price change
+            - "open,high,low,latest" — OHLC
+            - "volume,amount" — trading volume and turnover
+            - "bid1,ask1,bidSize1,askSize1" — best bid/ask
+            - "change,changePer" — price change
             - "turnoverRatio" — turnover ratio
             - "amplitude" — intraday amplitude
             - "preClose" — previous close
