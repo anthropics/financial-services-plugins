@@ -54,7 +54,9 @@
       "command": "python",
       "args": ["financial-analysis/mcp/ifind-mcp-server/server.py"],
       "env": {
-        "IFIND_REFRESH_TOKEN": ""
+        "IFIND_REFRESH_TOKEN": "",
+        "IFIND_USERNAME": "",
+        "IFIND_PASSWORD": ""
       }
     }
   }

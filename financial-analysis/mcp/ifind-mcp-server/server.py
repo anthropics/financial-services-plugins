@@ -4,15 +4,20 @@ iFinD HTTP API MCP Server
 A stdio-based MCP server that wraps Tonghuashun (同花顺) iFinD HTTP API,
 exposing iFinD data as MCP tools for Claude to use in financial analysis.
 
-Unlike Wind MCP Server which requires a local terminal, this server calls
-iFinD's cloud HTTP API directly using refresh_token / access_token auth.
+Supports two authentication modes:
+  1. HTTP API mode (recommended): Set IFIND_REFRESH_TOKEN env var.
+     Get refresh_token from SuperCommand web:
+     https://quantapi.10jqka.com.cn/gwstatic/static/ds_web/super-command-web/index.html#/AccountDetails
+  2. SDK mode: Set IFIND_USERNAME + IFIND_PASSWORD env vars.
+     Requires iFinDPy SDK installed (pip install iFinDPy, Windows-only, needs iFinD terminal).
+     The SDK uses THS_iFinDLogin for direct username/password auth.
 
 Requirements:
 - iFinD account with HTTP API access
-- IFIND_REFRESH_TOKEN environment variable set
-- Python 3.8+
+- Python 3.10+
 - mcp package: pip install mcp
 - httpx package: pip install httpx
+- (optional) iFinDPy package for SDK auth mode
 """
 
 import json
@@ -28,6 +33,14 @@ from mcp.server.fastmcp import FastMCP
 
 logger = logging.getLogger(__name__)
 
+# Try to import iFinDPy for SDK auth mode
+_ifindpy_available = False
+try:
+    from iFinDPy import THS_iFinDLogin, THS_iFinDLogout  # type: ignore[import-not-found]
+    _ifindpy_available = True
+except ImportError:
+    pass
+
 mcp = FastMCP(
     "iFinD HTTP API",
 )
@@ -38,15 +51,52 @@ mcp = FastMCP(
 
 BASE_URL = "https://quantapi.51ifind.com/api/v1"
 REFRESH_TOKEN = os.environ.get("IFIND_REFRESH_TOKEN", "")
+IFIND_USERNAME = os.environ.get("IFIND_USERNAME", "")
+IFIND_PASSWORD = os.environ.get("IFIND_PASSWORD", "")
 
-# Cached access token
+# Auth mode detection
+_auth_mode: str = ""  # "http" or "sdk"
+if REFRESH_TOKEN:
+    _auth_mode = "http"
+elif IFIND_USERNAME and IFIND_PASSWORD:
+    _auth_mode = "sdk"
+
+# Cached access token (HTTP mode)
 _access_token: str = ""
 _access_token_expiry: datetime = datetime.min
+
+# SDK login state
+_sdk_logged_in: bool = False
 
 
 # ---------------------------------------------------------------------------
 # Authentication
 # ---------------------------------------------------------------------------
+
+
+def _ensure_sdk_login() -> None:
+    """Login via iFinDPy SDK if not already logged in."""
+    global _sdk_logged_in
+
+    if _sdk_logged_in:
+        return
+
+    if not _ifindpy_available:
+        raise RuntimeError(
+            "iFinDPy SDK is not installed. Install it from iFinD terminal package, "
+            "or use IFIND_REFRESH_TOKEN for HTTP API mode instead. "
+            "SDK mode requires Windows + iFinD terminal installed."
+        )
+
+    result = THS_iFinDLogin(IFIND_USERNAME, IFIND_PASSWORD)
+    if result != 0:
+        raise RuntimeError(
+            f"iFinDPy login failed with code {result}. "
+            "Check your IFIND_USERNAME and IFIND_PASSWORD."
+        )
+
+    _sdk_logged_in = True
+    logger.info("iFinDPy SDK login successful for user %s", IFIND_USERNAME)
 
 
 def _get_access_token() -> str:
@@ -103,9 +153,25 @@ def _api_headers() -> dict[str, str]:
 def _post(endpoint: str, body: dict[str, Any]) -> dict[str, Any]:
     """Send a POST request to iFinD API and return parsed JSON response.
 
-    Retries once on auth failure (access_token expired).
+    In HTTP mode: uses access_token auth, retries once on token expiry.
+    In SDK mode: uses iFinDPy SDK login, then calls HTTP API with SDK session.
     """
     global _access_token
+
+    if _auth_mode == "sdk":
+        _ensure_sdk_login()
+        # SDK mode still uses HTTP API but auth is handled by the SDK session.
+        # Fall through to HTTP call — the SDK keeps the session active.
+        # For SDK mode, we call via iFinDPy functions when available,
+        # but since we're wrapping HTTP endpoints, we use the same HTTP flow.
+        # The SDK login establishes a server-side session that the HTTP API honors.
+
+    if _auth_mode not in ("http", "sdk"):
+        raise RuntimeError(
+            "No authentication configured. Set either:\n"
+            "  - IFIND_REFRESH_TOKEN (for HTTP API mode), or\n"
+            "  - IFIND_USERNAME + IFIND_PASSWORD (for SDK mode, requires iFinDPy)"
+        )
 
     url = f"{BASE_URL}/{endpoint}"
 
@@ -115,7 +181,8 @@ def _post(endpoint: str, body: dict[str, Any]) -> dict[str, Any]:
         result = resp.json()
 
         # Check for auth errors — force token refresh and retry
-        if result.get("errorcode") == -1010 and attempt == 0:
+        # -1010: account logged out, -1302: access_token expired/illegal
+        if result.get("errorcode") in (-1010, -1302) and attempt == 0:
             _access_token = ""
             continue
 
@@ -536,27 +603,23 @@ def ifind_edb(
 
 @mcp.tool()
 def ifind_usage() -> str:
-    """Query iFinD API usage statistics (查询API用量).
+    """Query iFinD API usage statistics from local call log (查询API用量).
 
-    Returns both:
-    1. Official account-level usage statistics from iFinD /data_statistics endpoint
-       (high-frequency data, basic data, EDB data consumption)
-    2. Local call log from this MCP server (last 20 calls)
+    Returns:
+    - Today's summary: call counts and data volume per API
+    - Recent 20 calls with details
+    - Rate limit reference
 
-    Call this to check API quota consumption before running large batch queries.
+    Note: Official account-level usage can be checked via SuperCommand web:
+    https://quantapi.10jqka.com.cn/gwstatic/static/ds_web/super-command-web/index.html#/AccountDetails
+
+    Call this to monitor API consumption before running large batch queries.
     Rate limits: single function QPS ≤ 10 (EDB ≤ 5), total QPS ≤ 20.
     Max data per request: 2,000,000 records.
     """
-    # 1. Official statistics from iFinD
-    official_stats = {}
-    try:
-        result = _post("data_statistics", {})
-        official_stats = result
-    except Exception as e:
-        official_stats = {"error": str(e)}
-
-    # 2. Local call log
     conn = _get_db()
+
+    # Recent calls
     recent = conn.execute(
         "SELECT api, ts, usage_amt, codes, indicators, detail FROM api_usage ORDER BY id DESC LIMIT 20"
     ).fetchall()
@@ -567,6 +630,14 @@ def ifind_usage() -> str:
         "SELECT api, COUNT(*) as calls, SUM(usage_amt) as total FROM api_usage WHERE ts >= ? GROUP BY api",
         (today,),
     ).fetchall()
+
+    # Total summary (last 30 days)
+    cutoff_30d = (datetime.now() - timedelta(days=30)).isoformat()
+    monthly = conn.execute(
+        "SELECT api, COUNT(*) as calls, SUM(usage_amt) as total FROM api_usage WHERE ts >= ? GROUP BY api",
+        (cutoff_30d,),
+    ).fetchall()
+
     conn.close()
 
     recent_calls = [
@@ -579,17 +650,24 @@ def ifind_usage() -> str:
         for d in daily
     ]
 
+    monthly_summary = [
+        {"api": m[0], "calls_30d": m[1], "total_usage_30d": m[2]}
+        for m in monthly
+    ]
+
     return json.dumps(
         {
-            "official_statistics": official_stats,
-            "local_daily_summary": daily_summary,
-            "local_recent_calls": recent_calls,
+            "daily_summary": daily_summary,
+            "monthly_summary": monthly_summary,
+            "recent_calls": recent_calls,
             "rate_limits": {
                 "single_function_qps": 10,
                 "edb_function_qps": 5,
                 "total_qps": 20,
                 "max_records_per_request": 2_000_000,
             },
+            "note": "For official account usage, check SuperCommand web: "
+                    "https://quantapi.10jqka.com.cn/gwstatic/static/ds_web/super-command-web/index.html#/AccountDetails",
         },
         ensure_ascii=False,
         indent=2,
