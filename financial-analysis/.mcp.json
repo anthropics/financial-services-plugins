@@ -48,6 +48,14 @@
       "type": "stdio",
       "command": "python",
       "args": ["financial-analysis/mcp/wind-mcp-server/server.py"]
+    },
+    "ifind": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["financial-analysis/mcp/ifind-mcp-server/server.py"],
+      "env": {
+        "IFIND_REFRESH_TOKEN": ""
+      }
     }
   }
 }
