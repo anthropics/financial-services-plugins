@@ -41,6 +41,9 @@ coverage/
 *.egg-info/
 .eggs/
 
+# Wind MCP usage database
+wind_usage.db
+
 # Personal files
 TASKS.md
 MEMORY.md

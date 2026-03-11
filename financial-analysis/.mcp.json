@@ -43,6 +43,11 @@
     "egnyte": {
       "type": "http",
       "url": "https://mcp-server.egnyte.com/mcp"
+    },
+    "wind": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["financial-analysis/mcp/wind-mcp-server/server.py"]
     }
   }
 }

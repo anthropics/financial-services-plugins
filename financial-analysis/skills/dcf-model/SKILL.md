@@ -12,6 +12,7 @@ This skill creates institutional-quality DCF models for equity valuation followi
 ## Tools
 
 - Default to using all of the information provided by the user and MCP servers available for data sourcing.
+- For China/HK listed companies, prefer Wind MCP tools (`wind_wsd` for historical financials, `wind_wss` for latest data, `wind_edb` for macro/risk-free rate data) as the primary data source.
 
 ## Critical Constraints - Read These First
 
