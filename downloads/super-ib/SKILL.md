@@ -1,6 +1,9 @@
-# Super IB
+---
+name: super-ib
+description: "End-to-end investment banking deal execution skill — from pitch to close, including deal marketing, financial modeling, presentation QC, and spreadsheet tools. Combines pitch decks, CIMs, teasers, buyer lists, merger models, process letters, deal tracking, strip profiles, datapacks, deck checking, deck refresh, PPT templates, spreadsheet auditing, and data cleaning into a single workflow. Use for any IB task including 'build a pitch deck,' 'draft a CIM,' 'write a teaser,' 'buyer list,' 'merger model,' 'process letter,' 'track deals,' 'strip profile,' 'check this deck,' 'audit this spreadsheet,' 'clean this data,' or when a task spans multiple IB workstreams. Also triggers on 'super ib,' 'IB workflow,' 'deal execution,' 'sell-side process,' 'M&A materials,' or 'pitchbook.'"
+---
 
-description: End-to-end investment banking deal execution skill — from pitch to close, including deal marketing, financial modeling, presentation QC, and spreadsheet tools. Combines pitch deck creation, CIM drafting, teaser writing, buyer list building, merger modeling, process letters, deal tracking, strip profiles, datapack building, deck checking, deck refreshing, PPT template creation, spreadsheet auditing, and data cleaning into a single unified workflow. Use for any IB workflow, or when a task spans multiple deal execution stages. Triggers on "super ib", "full deal execution", "IB workflow", "run the full IB process", "end to end banking", or when the user's request touches multiple IB workstreams.
+# Super IB
 
 ## Overview
 
@@ -23,6 +26,37 @@ Quality & Productivity Tools (available at any stage):
   ├── Audit Spreadsheet — Formula and model integrity checks
   └── Clean Data — Normalize messy spreadsheet data
 ```
+
+---
+
+## File Output Standards
+
+Before creating any deliverable file, read the appropriate document creation skill:
+- **PowerPoint files** (pitch decks, strip profiles, presentations): Read `/mnt/skills/public/pptx/SKILL.md` first. This contains the python-pptx patterns, slide layout conventions, and formatting standards for professional output.
+- **Excel files** (merger models, datapacks, comp tables, sensitivity tables): Read `/mnt/skills/public/xlsx/SKILL.md` first. Apply IB color coding (blue = inputs, black = formulas, green = cross-sheet links). Zero formula errors. Years as text (not numbers).
+- **Word documents** (CIMs, process letters, memos): Read `/mnt/skills/public/docx/SKILL.md` first. Professional formatting with TOC, headers, and page numbers.
+- **PDF reports** (teasers, one-pagers): Read `/mnt/skills/public/pdf/SKILL.md` first.
+
+These skills contain production-grade formatting standards and code patterns. Do not build files without consulting them. The difference between "AI-generated output" and "client-ready output" lives in these details.
+
+---
+
+## Deal Context (Gather Before Any Module)
+
+Before running any module, confirm or collect this context. For full deal execution, gather once at the start.
+
+> Before I build anything, I need the deal context:
+> 1. **Role**: Are we sell-side or buy-side? (This changes the framing of every document)
+> 2. **Deal type**: M&A (sale of company), financing (debt or equity raise), restructuring, fairness opinion, other?
+> 3. **Client**: Company name, what they do (1 sentence), approximate size (revenue/EBITDA range)
+> 4. **Stage**: Where are we in the process? (Pre-mandate pitch, engaged and marketing, in-process, near close)
+> 5. **Available materials**: What exists? (financial model, prior decks, CIM draft, data room, management deck)
+> 6. **Template**: Do you have a firm PowerPoint template? (Upload it — I'll match the formatting)
+> 7. **Audience**: Who will see the output? (Client CEO, potential buyers, internal deal team, IC)
+> 8. **Timeline**: Deadline for the deliverable?
+> 9. **Confidentiality**: Code name for the deal? Any anonymization requirements?
+
+If materials are provided (CIM, model, prior decks), read them in full before producing any output. Cross-reference financial data across sources and flag discrepancies before they reach a client.
 
 ---
 
@@ -102,6 +136,18 @@ Structure and draft Confidential Information Memorandums for sell-side M&A proce
 **VII. Financial Overview** (5-8 pages) — Historical IS (3-5 years), revenue analysis, EBITDA bridge, BS, CF, capex, working capital, forecast
 **VIII. Appendix** — Detailed financials, customer list, product catalog, management bios
 
+### CIM Intake
+
+Before drafting, confirm:
+1. What materials are available? (management deck, financial model, prior year financials, customer list, org chart, data room)
+2. Any sections the client wants emphasized or downplayed?
+3. Target audience profile — financial sponsors, strategic acquirers, or both?
+4. Confidentiality level — any information that cannot be included?
+5. Timeline — when does the CIM need to be distributed?
+6. Review process — who approves before distribution? (Client CEO, legal counsel, deal team)
+
+Read all provided materials before drafting. Extract financials from the most authoritative source (audited statements > management model > CIM draft). Flag any discrepancies between sources.
+
 ### Drafting Guidelines
 - Tone: Professional, factual, compelling but not hyperbolic
 - Support every claim with data ("Revenue grew at 15% CAGR from 2021-2024")
@@ -135,6 +181,16 @@ Draft anonymous one-page company teasers for sell-side processes.
 
 Build a universe of potential acquirers for sell-side M&A processes.
 
+### Buyer List Intake
+
+Before building the list:
+1. What is the company being sold? (Use CIM or teaser if already produced — don't re-ask)
+2. Any buyers to exclude? (Competitors the client won't sell to, prior approaches that went poorly)
+3. Any buyers to definitely include? (Client relationships, known interested parties)
+4. Preferred deal structure? (Strategic sale, PE platform, add-on to a portfolio company, recapitalization)
+5. International buyers in scope or domestic only?
+6. Minimum buyer size or financial capacity?
+
 ### Strategic Buyers
 - **Direct competitors**: Market share gain, scale
 - **Adjacent players**: Product extension, cross-sell, new market
@@ -162,25 +218,106 @@ Assess: Fund size, sector focus, portfolio overlap, recent activity, priority
 
 ## Module 5: Merger Model
 
-Build accretion/dilution analysis for M&A transactions.
+Build accretion/dilution analysis for M&A transactions. This is the core analytical deliverable in any stock-for-stock or mixed-consideration deal — it determines whether the deal is financially attractive to the acquirer's shareholders.
 
-### Inputs
-- Acquirer: Share price, shares outstanding, LTM/NTM EPS, P/E, cost of debt, tax rate, cash, debt
-- Target: Share price (if public), shares outstanding, EPS/net income, EV
-- Deal terms: Offer price/premium, cash vs. stock mix, new debt, synergies + phase-in, fees, close date
+### Workflow
 
-### Analysis
-1. **Purchase Price**: Offer price, premium, equity value, EV, implied multiples
-2. **Sources & Uses**: New debt, cash, new equity vs. purchase price, refinancing, fees
-3. **Pro Forma EPS** (Year 1-3): Standalone vs. pro forma with synergies, foregone interest, new interest, intangible amortization
-4. **Sensitivities**: Accretion/dilution vs. synergies & premium; vs. cash/stock mix
-5. **Breakeven Synergies**: Minimum for EPS-neutral in Year 1
+**Step 1: Gather Inputs**
+
+| Category | Input | Source |
+|----------|-------|--------|
+| **Acquirer** | Share price, diluted shares outstanding, LTM and NTM EPS, P/E multiple, credit rating, cost of debt, tax rate, cash on hand, existing debt | Public filings, consensus |
+| **Target** | Share price (if public), diluted shares, LTM/NTM EPS or net income, enterprise value | Public filings, CIM, or model |
+| **Deal Terms** | Offer price per share or total equity value, premium to current price, cash vs. stock mix (% each), new debt raised, assumed debt, synergies (revenue and cost) with phase-in schedule, transaction fees, expected close date | Term sheet, deal team |
+
+**Step 2: Sources & Uses of Funds**
+
+| Sources | $ | | Uses | $ |
+|---------|---|-|------|---|
+| New debt raised | | | Equity value (offer x shares) | |
+| Cash from acquirer BS | | | Refinance target debt | |
+| New equity issued (shares x price) | | | Transaction fees (advisory, legal, financing) | |
+| **Total Sources** | | | **Total Uses** | |
+
+Sources = Uses. Always. If they don't balance, something is missing.
+
+**Step 3: Purchase Price Allocation**
+
+| Item | Amount |
+|------|--------|
+| Equity purchase price | |
+| + Target net debt assumed | |
+| = Enterprise value / total consideration | |
+| - Fair value of net tangible assets | |
+| = Excess purchase price | |
+| Allocated to identifiable intangibles (customer relationships, technology, brand) | |
+| Remaining = Goodwill | |
+
+Intangible amortization: identifiable intangibles amortized over useful life (typically 5-15 years). This is a non-cash charge that reduces GAAP EPS but not cash EPS. The amortization schedule feeds directly into the pro forma income statement.
+
+**Step 4: Pro Forma Income Statement (Year 1-3)**
+
+For each projection year:
+
+| Line Item | Acquirer Standalone | Target Standalone | Adjustments | Pro Forma Combined |
+|-----------|--------------------|--------------------|-------------|-------------------|
+| Revenue | | | + Revenue synergies | |
+| Operating expenses | | | - Cost synergies | |
+| Operating income | | | | |
+| + Interest income | | | - Foregone interest (cash used) | |
+| - Interest expense | | | + New debt interest | |
+| - Intangible amortization | — | — | + PPA amortization | |
+| Pre-tax income | | | | |
+| - Taxes | | | Adjusted for tax effect | |
+| Net income | | | | |
+| Diluted shares | | | + New shares issued (if stock deal) | |
+| **EPS** | | | | |
+
+**Step 5: Accretion / Dilution Analysis**
+
+| Metric | Year 1 | Year 2 | Year 3 |
+|--------|--------|--------|--------|
+| Acquirer standalone EPS | | | |
+| Pro forma EPS (with synergies) | | | |
+| $ accretion / (dilution) | | | |
+| % accretion / (dilution) | | | |
+| Pro forma EPS (without synergies) | | | |
+| $ accretion / (dilution) ex-synergies | | | |
+
+Show both with and without synergies. The "without synergies" line reveals whether the deal works on its own or is entirely dependent on synergy realization.
+
+**Step 6: Breakeven Synergies Analysis**
+
+Calculate the minimum synergies required for the deal to be EPS-neutral in Year 1:
+
+Breakeven synergies = (Standalone acquirer EPS x pro forma shares) - (Acquirer NI + Target NI - new interest + foregone interest) / (1 - tax rate)
+
+If breakeven synergies are >75% of the total claimed synergies, the deal has thin margin for execution risk. Flag this.
+
+**Step 7: Sensitivity Tables**
+
+Build three grids, each cell showing % accretion/(dilution):
+
+1. **Synergies vs. Premium** — tests how much synergy the acquirer needs at different offer prices
+2. **Cash/Stock Mix vs. Premium** — tests how consideration form affects dilution at different prices
+3. **Synergies vs. Cost of Debt** — tests interest rate sensitivity on the financing side
+
+Color code: green (accretive), red (dilutive), yellow (< 1% either way).
+
+**Step 8: Output**
+
+- Excel workbook with tabs: Assumptions, Sources & Uses, PPA, Pro Forma IS, Accretion/Dilution, Sensitivities
+- Apply xlsx skill standards: blue inputs, black formulas, green cross-links
+- Summary slide (1 page) for pitch deck insertion showing: deal terms, S&U, accretion/dilution by year, key sensitivities
+- All numbers must tie: S&U balances, pro forma shares consistent across tabs, tax calculations consistent
 
 ### Important Notes
-- Show both GAAP and adjusted EPS
-- Include purchase price allocation (goodwill, intangible amortization)
-- Synergy phase-in: Year 1 often only 25-50% of run-rate
-- Don't forget foregone interest income and new interest expense
+- Show both GAAP EPS and cash EPS (add back intangible amortization) — some acquirers focus on cash EPS
+- Purchase price allocation is an estimate at this stage — note that final PPA will differ
+- Synergy phase-in matters: Year 1 is typically 25-50% of run-rate, Year 2 is 75-100%
+- Don't forget: foregone interest on cash used, new interest on debt raised, intangible amortization, incremental shares issued
+- If the deal is dilutive in Year 1 even with full synergies, that's a significant finding — make it prominent, not buried
+- For all-stock deals, also show the implied exchange ratio and what happens if acquirer stock moves +/- 10%
 
 ---
 
@@ -193,6 +330,15 @@ Draft process letters and bid instructions for sell-side M&A.
 2. **IOI instructions**: Valuation range, consideration form, financing certainty, diligence requirements, timeline to close, conditions, buyer description
 3. **Final bid letter**: SPA markup, committed financing, remaining diligence, exclusivity terms, regulatory analysis, key personnel terms, evaluation criteria
 4. **Management meeting invitation**: Logistics, attendees, agenda, ground rules, materials, follow-up process
+
+### Process Letter Intake
+
+Before drafting:
+1. Which letter type? (Initial process, IOI instructions, final bid, management meeting invitation)
+2. Where are we in the process timeline?
+3. Any specific terms to include or exclude?
+4. Legal counsel review required before distribution?
+5. Response deadline — how many weeks/days?
 
 ---
 
@@ -345,18 +491,40 @@ Whitespace, inconsistent casing, numbers stored as text, mixed date formats, dup
 
 ---
 
+## Quality Standards (All Modules)
+
+### Numbers
+- Every financial figure traces to a source (CIM page, filing, model cell). Unsourced numbers do not appear in client materials.
+- The same number appearing on multiple slides or in multiple documents must be identical. If revenue is $127M on the teaser, it's $127M in the CIM, $127M in the pitch deck, and $127M in the datapack. Zero tolerance for inconsistency.
+- Calculated metrics (CAGR, margins, multiples) must be formula-derived, not manually entered. If the CAGR is wrong because someone hardcoded it, the Deck Checker should catch it — but the goal is to never create the error in the first place.
+
+### Documents
+- Every PowerPoint deliverable gets an IB Deck Checker pass before delivery. No exceptions.
+- Every Excel deliverable gets an Audit Spreadsheet pass before delivery. No exceptions.
+- CIMs and process letters get a read-through for consistency with the teaser and pitch deck.
+- Confidentiality disclaimers appear on every external document.
+
+### Process
+- Never distribute materials without explicit user approval.
+- Never include information the client has not approved for disclosure.
+- Flag stale data — if financials are more than 3 months old, note it and recommend updating.
+- Track versions — if a document has been revised, note the version and date.
+
+---
+
 ## Cross-Module Integration
 
-When running a full deal, modules chain naturally:
+When running a full deal, modules chain with specific data flows:
 
-| Phase | Modules Used |
-|-------|-------------|
-| **Win the mandate** | Pitch Deck + Strip Profile |
-| **Market the deal** | Teaser + CIM + Buyer List + Process Letter |
-| **Run the process** | Deal Tracker + Management Meeting logistics |
-| **Support diligence** | Datapack Builder + Audit Spreadsheet + Clean Data |
-| **Evaluate & model** | Merger Model |
-| **QC before sending** | IB Deck Checker + Deck Refresh |
-| **Ongoing** | Deal Tracker for pipeline management |
+| Phase | Modules | Data That Flows Forward |
+|-------|---------|------------------------|
+| **Win the mandate** | Pitch Deck + Strip Profile | Company research, financial data, market positioning — used in all subsequent deal materials |
+| **Market the deal** | Teaser -> CIM -> Buyer List -> Process Letter | Teaser's anonymized highlights inform CIM structure. CIM financials feed the buyer list's fit assessment. Buyer list tiers determine process letter distribution. |
+| **Run the process** | Deal Tracker + Process Letter | Tracker milestones drive process letter timing. NDA/CIM distribution dates populate tracker. Bid deadlines from process letters become tracker milestones. |
+| **Support diligence** | Datapack Builder + Audit Spreadsheet + Clean Data | Raw data room files -> Clean Data normalizes -> Datapack Builder structures -> Audit Spreadsheet validates. Cleaned data feeds the merger model. |
+| **Evaluate & model** | Merger Model | CIM financials + datapack financials -> Merger Model inputs. Model outputs -> updated pitch deck slides for board presentation. |
+| **QC before sending** | IB Deck Checker -> Deck Refresh | Checker identifies issues -> fixes applied -> Refresh updates any stale numbers -> final Checker pass before distribution. |
 
-**To use**: Describe what you need. If your request spans multiple modules, the skill orchestrates them. If you need a single module, it executes just that one.
+**Rule:** When a module produces output that a downstream module needs, link it explicitly. Don't ask the user to re-provide data that was already extracted in an earlier module. If the CIM Builder extracted financials, the Merger Model should reference those same numbers — not ask the user for them again.
+
+**To use**: Describe what you need. If your request spans multiple modules, the skill orchestrates them in sequence and carries data forward. If you need a single module, it executes just that one.

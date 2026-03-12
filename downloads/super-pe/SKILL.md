@@ -1,6 +1,9 @@
-# Super PE
+---
+name: super-pe
+description: "End-to-end private equity deal lifecycle skill — from sourcing through portfolio monitoring. Combines deal sourcing, screening, due diligence, IC memo drafting, returns analysis, unit economics, portfolio monitoring, and value creation into a single unified workflow. Use for any PE workflow including 'source deals,' 'screen this CIM,' 'diligence checklist,' 'IC memo,' 'model returns,' 'unit economics,' 'portfolio review,' 'value creation plan,' or when a task spans multiple PE deal stages. Also triggers on 'super pe,' 'PE workflow,' 'full deal process,' 'deal evaluation,' 'investment committee,' or 'LBO returns.'"
+---
 
-description: End-to-end private equity deal lifecycle skill — from sourcing through portfolio monitoring. Combines deal sourcing, deal screening, due diligence checklists, diligence meeting prep, IC memo drafting, returns analysis, unit economics, portfolio monitoring, and value creation planning into a single unified workflow. Use for any PE workflow, or when a task spans multiple stages of the deal lifecycle. Triggers on "super pe", "full deal workflow", "PE workflow", "run the full process", "end to end PE", or when the user's request touches multiple PE workstreams.
+# Super PE
 
 ## Overview
 
@@ -22,6 +25,36 @@ Deal Lifecycle:
 
 ---
 
+## File Output Standards
+
+Before creating any deliverable file, read the appropriate document creation skill:
+- **Excel files** (returns models, sensitivity tables, KPI dashboards, DD trackers): Read `/mnt/skills/public/xlsx/SKILL.md` first. Apply blue/black/green color coding (blue = inputs, black = formulas, green = cross-tab links). Zero formula errors.
+- **Word documents** (IC memos, screening memos): Read `/mnt/skills/public/docx/SKILL.md` first. Professional formatting with table of contents, headers, and page numbers.
+- **PowerPoint files** (IC deck slides, returns summaries): Read `/mnt/skills/public/pptx/SKILL.md` first.
+- **PDF reports** (portfolio monitoring summaries): Read `/mnt/skills/public/pdf/SKILL.md` first.
+
+These skills contain the formatting standards, openpyxl/python-pptx patterns, and quality requirements for professional output. Do not build files without reading them.
+
+---
+
+## Deal Context (Gather Once, Use Everywhere)
+
+Before running any stage, confirm or collect this context. If the user is running multiple stages in sequence, gather this once at the start — it carries through all stages.
+
+> Before we start, I need the deal context:
+> 1. **Fund profile**: Fund name, fund size, target check size range, target ownership (control / significant minority / growth)
+> 2. **Investment criteria**: Revenue range, EBITDA range, sector focus, geography, deal types (platform, add-on, growth, recap, carve-out)
+> 3. **Current deal stage**: Are we starting from scratch (sourcing), or picking up at a specific stage?
+> 4. **Available materials**: What do you have? (CIM, teaser, financial model, data room access, management deck, prior memos)
+> 5. **Team context**: Who's on the deal team? Who needs to review outputs?
+> 6. **Timeline**: Any hard deadlines? (IC date, bid deadline, exclusivity expiration)
+
+If context was provided in a prior conversation or in `.agents/product-marketing-context.md`, read it first and confirm what's known. Only ask for what's missing.
+
+Store confirmed deal context and reuse across stages — do not re-ask for fund criteria when moving from screening to diligence.
+
+---
+
 ## Stage 1: Deal Sourcing
 
 Discover target companies, check CRM for existing relationships, and draft personalized founder outreach emails.
@@ -34,12 +67,26 @@ Discover target companies, check CRM for existing relationships, and draft perso
 - Sources: Web search, industry reports, conference attendee lists, trade publications, competitor landscapes
 - Output: Shortlist with name, description, estimated revenue/size, location, founder/CEO name, website, and thesis fit
 
-**Step 2: CRM Check**
-- Search email (Gmail) for prior correspondence with the company or founder
-- Search Slack for internal mentions or prior discussions
-- Ask user: "Have you or your team had any prior contact with [Company]?"
-- Flag existing relationships, prior passes, or known context
-- Output: For each company — "New", "Existing" (summarize prior contact), or "Previously Passed"
+**Step 2: Relationship & Prior Contact Check**
+
+If Gmail integration is connected:
+- Search for prior correspondence with the company name, founder name, and domain
+- Summarize: last contact date, context, outcome
+
+If Slack integration is connected:
+- Search for internal mentions of the company or founder
+- Summarize: who discussed it, when, in what context
+
+If neither integration is available:
+- Ask directly: "Have you or your team had any prior contact with [Company]? Any prior passes or known context I should know about?"
+
+For each company on the shortlist, output one of:
+- **New** — no prior contact found
+- **Existing relationship** — [summary of prior contact, who, when, outcome]
+- **Previously passed** — [reason if known, date of pass]
+- **Unknown** — integrations unavailable, user did not confirm
+
+Do not silently skip this step if tools are unavailable — the relationship status materially affects the outreach approach.
 
 **Step 3: Draft Founder Outreach**
 - Tone: Professional but warm — founders respond better to genuine, concise outreach
@@ -264,61 +311,148 @@ Prepare for due diligence meetings — management presentations, expert network 
 
 ## Stage 5: Returns Analysis
 
-Build quick IRR/MOIC sensitivity tables for PE deal evaluation.
+Build institutional-quality LBO returns models with sensitivity tables, scenario analysis, and returns attribution. This is the single most important analytical output in a PE process — it determines whether the deal gets done.
 
 ### Workflow
 
 **Step 1: Gather Deal Inputs**
 
-Entry: Entry EBITDA, entry multiple, enterprise value, net debt, equity check, fees
-Financing: Senior debt (x EBITDA, rate, amortization), sub debt/mezz, total leverage, equity contribution
-Operating: Revenue growth rate, EBITDA margin trajectory, capex %, working capital changes, debt paydown
-Exit: Hold period, exit multiple, exit EBITDA
+Collect in a structured format. Do not proceed with missing inputs — ask for them or clearly state assumptions.
 
-**Step 2: Base Case Returns**
+| Category | Input | Value | Source |
+|----------|-------|-------|--------|
+| **Entry** | Entry EBITDA (LTM, adjusted) | | QoE / screening |
+| | Entry multiple (EV / EBITDA) | | Broker guidance / comps |
+| | Enterprise value | | Calculated |
+| | Net debt at close | | CIM / data room |
+| | Transaction fees (% of EV) | | Typically 2-4% |
+| | Equity check (EV - net debt - fees funded by debt) | | Calculated |
+| **Financing** | Senior debt (x EBITDA) | | Lender terms |
+| | Senior rate (fixed or SOFR + spread) | | Lender terms |
+| | Senior amortization (% per year) | | Typically 1-5% |
+| | Sub debt / mezz (x EBITDA) | | If applicable |
+| | Sub rate | | |
+| | Total leverage (x EBITDA) | | Calculated |
+| | Management rollover (% of equity) | | Deal terms |
+| **Operations** | Revenue CAGR (by scenario) | | Diligence / model |
+| | EBITDA margin trajectory | | Diligence / model |
+| | Capex (% of revenue) | | Historical + plan |
+| | Working capital changes | | Diligence |
+| | Cash taxes (% of pre-tax) | | Tax diligence |
+| **Exit** | Hold period (years) | | Fund strategy |
+| | Exit multiple (by scenario) | | Comps / market |
 
-| Metric | Value |
-|--------|-------|
-| Entry EV | |
-| Equity invested | |
-| Exit EBITDA | |
-| Exit EV | |
-| Net debt at exit | |
-| Exit equity value | |
-| **MOIC** | |
-| **IRR** | |
+**Step 2: Sources & Uses**
 
-Returns waterfall: EBITDA growth contribution, multiple expansion/contraction, debt paydown, fee/expense drag
+| Sources | Amount | | Uses | Amount |
+|---------|--------|-|------|--------|
+| Senior debt | | | Enterprise value | |
+| Sub debt / mezz | | | Transaction fees | |
+| Sponsor equity | | | Financing fees | |
+| Management rollover | | | | |
+| **Total Sources** | | | **Total Uses** | |
 
-**Step 3: Sensitivity Tables**
-- Entry Multiple vs. Exit Multiple (IRR / MOIC in each cell)
-- EBITDA Growth vs. Exit Multiple
-- Leverage vs. Exit Multiple
-- Hold Period vs. Exit Multiple
+Sources must equal Uses. If they don't balance, flag it before proceeding.
 
-**Step 4: Scenario Analysis**
+**Step 3: Build the Operating Model**
 
-| | Bull | Base | Bear |
-|---|------|------|------|
-| Revenue CAGR | | | |
-| Exit EBITDA margin | | | |
+For each year of the hold period, project:
+- Revenue (prior year x (1 + growth rate))
+- EBITDA (revenue x margin)
+- Less: cash interest (beginning debt x rate)
+- Less: cash taxes
+- Less: capex
+- Less/plus: working capital changes
+- = Free cash flow to equity
+- Less: mandatory debt amortization
+- = Cash flow available for debt paydown / accumulation
+
+Track debt balance: beginning balance - mandatory amort - optional paydown (cash sweep if applicable) = ending balance.
+
+Track cash balance: beginning + FCF after debt service = ending. If cash exceeds a threshold, apply excess to debt paydown or accumulate per deal terms.
+
+**Step 4: Exit Valuation & Returns**
+
+| Metric | Bull | Base | Bear |
+|--------|------|------|------|
+| Exit year EBITDA | | | |
 | Exit multiple | | | |
-| MOIC | | | |
-| IRR | | | |
+| Exit enterprise value | | | |
+| Less: net debt at exit | | | |
+| Exit equity value | | | |
+| **Gross MOIC** | | | |
+| **Gross IRR** | | | |
+| Net MOIC (after fees/carry) | | | |
+| Net IRR (after fees/carry) | | | |
 
-**Step 5: Output** — Excel workbook with assumptions, returns calculation, formatted sensitivity tables, scenario summary. One-page returns summary for IC deck.
+**Key formulas:**
+- MOIC = Exit equity value / Equity invested
+- IRR = rate that solves: Equity invested x (1 + IRR)^n = Exit equity value (for single cash flow; use XIRR for interim distributions)
+- For deals with dividend recaps or interim distributions, model each cash flow individually and use XIRR
 
-### Key Formulas
-- **MOIC** = Exit Equity Value / Equity Invested
-- **IRR** = solve for r: Equity Invested x (1 + r)^n = Exit Equity Value
-- **Attribution**: Growth = (Exit EBITDA - Entry EBITDA) x Exit Multiple / Equity; Multiple = (Exit Multiple - Entry Multiple) x Entry EBITDA / Equity; Leverage = Debt paydown / Equity
+**Step 5: Returns Attribution Waterfall**
+
+Decompose total returns into the value creation drivers:
+
+| Driver | MOIC Contribution | % of Total Return |
+|--------|-------------------|-------------------|
+| Revenue growth | | |
+| Margin expansion | | |
+| Multiple expansion / (contraction) | | |
+| Debt paydown (leverage effect) | | |
+| Fees and friction (drag) | | |
+| **Total MOIC** | | |
+
+**Attribution methodology:**
+- Revenue growth contribution = (Exit revenue - Entry revenue) x Exit margin x Exit multiple / Equity invested
+- Margin expansion = Entry revenue growth to exit x (Exit margin - Entry margin) x Exit multiple / Equity invested
+- Multiple expansion = Entry EBITDA x (Exit multiple - Entry multiple) / Equity invested
+- Leverage contribution = Total debt paydown over hold / Equity invested
+- Fees = -1 x (transaction fees + financing fees + monitoring fees) / Equity invested
+
+This waterfall answers the IC's core question: "Where are the returns coming from?" If >50% comes from multiple expansion, the deal is a bet on market conditions. If >50% comes from operations (revenue + margin), the deal is an operations story. IC members will challenge this.
+
+**Step 6: Sensitivity Tables**
+
+Build four 2-variable sensitivity grids. Each cell shows IRR and MOIC.
+
+1. **Entry Multiple vs. Exit Multiple** — tests purchase price risk and exit environment
+2. **Revenue CAGR vs. Exit Multiple** — tests operating performance x exit
+3. **Leverage (x EBITDA) vs. Exit Multiple** — tests capital structure risk
+4. **Hold Period vs. Exit Multiple** — tests timing
+
+Format: IRR as percentage, MOIC as multiple. Color code: green (>25% IRR), yellow (15-25%), red (<15%). Highlight the base case cell.
+
+**Step 7: Scenario Summary**
+
+| | Bull | Base | Bear | Downside |
+|---|------|------|------|----------|
+| Revenue CAGR | | | | |
+| Exit EBITDA | | | | |
+| Exit margin | | | | |
+| Exit multiple | | | | |
+| Gross MOIC | | | | |
+| Gross IRR | | | | |
+| Net MOIC | | | | |
+| Net IRR | | | | |
+
+**Downside scenario must be included.** This is not "bad base case" — it's "what happens if the thesis is wrong." Revenue declines, margin compresses, exit multiple contracts. The question is: do we get our money back? If downside MOIC < 1.0x, the deal has loss risk that IC needs to understand.
+
+**Step 8: Output**
+
+- Excel workbook with tabs: Assumptions, Sources & Uses, Operating Model, Returns Summary, Sensitivity Tables, Scenario Comparison
+- Apply xlsx skill standards: blue inputs, black formulas, green cross-links, zero errors
+- One-page returns summary (Word or slide) for IC deck insertion
+- All numbers must tie: S&U balances, debt schedule reconciles to BS, exit EV math is transparent
 
 ### Important Notes
 - Show returns both gross and net of fees/carry
-- Account for management rollover and co-invest
+- Account for management rollover and co-invest in equity check
 - Include dividend recaps or interim distributions if planned
-- Don't forget transaction costs (2-4% of EV)
-- Consider tax structure (asset vs. stock deal, 338(h)(10))
+- Transaction costs are typically 2-4% of EV — don't forget them
+- Tax structure matters: asset deal 338(h)(10) election changes depreciation basis
+- Always show the downside case — hiding it doesn't make it go away
+- If returns are >30% IRR in the base case, pressure-test the assumptions — either the deal is exceptional or the model is wrong
 
 ---
 
@@ -426,6 +560,14 @@ Draft a structured IC memo synthesizing all prior stages into a professional, IC
 - Tables for financials and returns
 - All numbers should tie — EBITDA bridges, S&U balances, returns math
 
+### Quality Gates (Check Before Delivering)
+
+1. **Numbers tie.** EBITDA in the financial analysis section matches the returns analysis. S&U balances. Debt schedule ties to the balance sheet. Entry multiple x entry EBITDA = enterprise value. If any number appears in two places, it must be identical.
+2. **Bull and bear are honest.** The bull case is not "everything goes perfectly." The bear case is not "slightly below base." Bull = thesis plays out plus some upside. Bear = thesis partially fails. Downside = thesis is wrong. If bull and bear MOIC are within 0.5x of each other, the scenario analysis is too narrow.
+3. **Risks are ranked and mitigated.** Each risk has a severity (deal-breaker / significant / manageable), a probability, and a specific mitigant. "Market risk" is not a risk — "customer concentration: top 3 customers = 45% of revenue" is a risk.
+4. **Recommendation is clear.** "Proceed" / "Pass" / "Proceed with conditions." If conditional, name the exact conditions (e.g., "proceed if QoE confirms adjusted EBITDA within 5% of CIM," "proceed contingent on key employee retention agreements").
+5. **One-paragraph test.** A senior partner who reads only the executive summary should be able to understand: what the company does, why it's interesting, what the returns look like, and what could go wrong. If the exec summary fails this test, rewrite it.
+
 ### Important Notes
 - Be factual and balanced — present both bull and bear cases honestly
 - Don't minimize risks — IC members will find them
@@ -512,6 +654,46 @@ Structure post-acquisition value creation with revenue, cost, and operational le
 | Technology investment | | | | | |
 | **Pro Forma EBITDA** | | | | | |
 | **Margin** | | | | | |
+
+**Step 3B: Industry-Specific Value Creation Playbooks**
+
+Apply the relevant playbook based on the target's business model. These are starting frameworks — customize based on diligence findings.
+
+#### Software / SaaS
+- **Revenue**: Price increases (low-hanging — most SaaS companies underprice), product-led expansion, upsell/cross-sell, new verticals, international
+- **Retention**: Reduce churn through onboarding improvement, customer success investment, product stickiness features
+- **Margins**: Hosting cost optimization (cloud renegotiation, architecture efficiency), G&A leverage as revenue scales, reduce professional services dependency
+- **Multiple expansion**: Shift from license to subscription (if not already), improve NRR above 120%, build platform/marketplace dynamics
+- **Add-ons**: Acquire complementary products to increase wallet share, acquire customer bases in adjacent verticals
+- **Key KPIs to move**: NRR, gross margin, CAC payback, ARR growth rate, Rule of 40
+
+#### Healthcare Services
+- **Revenue**: Geographic expansion (de novo + acquisition), payor mix optimization, ancillary service lines, value-based care contracts
+- **Margins**: Procurement consolidation, revenue cycle management improvement, labor model optimization (staffing mix, scheduling)
+- **Regulatory**: Compliance infrastructure as a competitive advantage, prepare for reimbursement changes
+- **Add-ons**: Build density in existing markets before expanding (referral network effects)
+- **Key KPIs to move**: Same-store revenue growth, payor mix (commercial vs. government), patient volume, labor cost as % of revenue
+
+#### Industrial / Manufacturing
+- **Revenue**: Pricing (cost-plus renegotiation), aftermarket/service revenue (higher margin), new OEM relationships, geographic expansion
+- **Margins**: Procurement consolidation, lean manufacturing, automation investment, energy cost reduction, overhead rationalization
+- **Capital efficiency**: Working capital reduction (inventory optimization, AR collection), capex discipline (maintenance vs. growth)
+- **Add-ons**: Vertical integration (bring outsourced steps in-house), geographic tuck-ins for customer proximity, capability acquisitions
+- **Key KPIs to move**: Gross margin, EBITDA margin, revenue per employee, inventory turns, OTD (on-time delivery)
+
+#### Business Services
+- **Revenue**: Price increases, new service lines, technology enablement (SaaS layer on top of services), strategic account expansion
+- **Margins**: Delivery model optimization (onshore/offshore mix), technology substitution for manual processes, scale leverage
+- **Recurring revenue**: Convert project-based to recurring/managed services contracts, build subscription offerings
+- **Add-ons**: Acquire capabilities that cross-sell into existing client base, acquire recurring revenue streams
+- **Key KPIs to move**: Revenue per employee, utilization rate, contract renewal rate, recurring revenue %, gross margin by service line
+
+#### Consumer / Retail
+- **Revenue**: New store/location economics, e-commerce channel, pricing/promotion optimization, new product lines, loyalty program
+- **Margins**: Supply chain optimization, private label expansion, labor scheduling optimization, rent renegotiation
+- **Brand**: Marketing efficiency (shift to digital, improve ROAS), brand extensions, franchise model
+- **Add-ons**: Adjacent brands, geographic roll-ups, vertical integration (manufacturing, distribution)
+- **Key KPIs to move**: Same-store sales growth, gross margin, customer acquisition cost, repeat purchase rate, inventory turn
 
 **Step 4: 100-Day Plan**
 
