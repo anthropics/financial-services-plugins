@@ -38,6 +38,17 @@
       "name": "sp-global",
       "source": "./partner-built/spglobal",
       "description": "S&P Global - Financial data and analytics skills including company tearsheets, earnings previews, and transaction summaries"
+    },
+    {
+      "name": "daloopa",
+      "description": "Financial analysis skills powered by Daloopa's institutional-grade data",
+      "category": "finance",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/daloopa/plugin.git",
+        "sha": "b5641f5bdfb2a44ac541486444cd8a595ccfc49c"
+      },
+      "homepage": "https://github.com/daloopa/plugin"
     }
   ]
 }
