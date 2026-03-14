@@ -36,7 +36,7 @@ Start with **financial analysis** — the core plugin that provides shared model
 | **[private equity](./private-equity)** | Add-on | Source and screen deals, run due diligence checklists, analyze unit economics and returns, draft IC memos, and monitor portfolio company KPIs. | — |
 | **[wealth management](./wealth-management)** | Add-on | Prep for client meetings, build financial plans, rebalance portfolios, generate client reports, and identify tax-loss harvesting opportunities. | — |
 
-**41 skills, 38 commands, 11 MCP integrations**
+**41 skills, 39 commands, 11 MCP integrations**
 
 Install these directly from Cowork, browse the full collection here on GitHub, or build your own.
 
