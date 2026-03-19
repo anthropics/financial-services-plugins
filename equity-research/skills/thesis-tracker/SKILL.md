@@ -1,6 +1,9 @@
-# Thesis Tracker
-
+---
+name: thesis-tracker
 description: Maintain and update investment theses for portfolio positions and watchlist names. Track key data points, catalysts, and thesis milestones over time. Use when updating a thesis with new information, reviewing position rationale, or checking if a thesis is still intact. Triggers on "update thesis for [company]", "is my thesis still intact", "thesis check", "add data point to [company]", or "review my positions".
+---
+
+# Thesis Tracker
 
 ## Workflow
 
