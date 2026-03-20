@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} v{{ version }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>{{ app_name }}</h1>
+            <p class="subtitle">A股 + 港股 | 免费数据源 | v{{ version }}</p>
+        </div>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" onclick="showTab('market')">市场概览</button>
+        <button class="nav-btn" onclick="showTab('a-stock')">A股查询</button>
+        <button class="nav-btn" onclick="showTab('hk-stock')">港股查询</button>
+        <button class="nav-btn" onclick="showTab('screener')">股票筛选</button>
+        <button class="nav-btn" onclick="showTab('ah-compare')">AH对比</button>
+        <button class="nav-btn" onclick="showTab('about')">关于</button>
+    </nav>
+
+    <main>
+        <!-- 市场概览 -->
+        <section id="tab-market" class="tab-content active">
+            <h2>市场概览</h2>
+            <button class="btn-primary" onclick="loadMarketOverview()">刷新数据</button>
+            <div id="market-indices" class="card-container"></div>
+            <h3>行业板块排行</h3>
+            <button class="btn-secondary" onclick="loadIndustries()">加载板块数据</button>
+            <div id="industry-boards"></div>
+        </section>
+
+        <!-- A股查询 -->
+        <section id="tab-a-stock" class="tab-content">
+            <h2>A股查询</h2>
+            <div class="search-box">
+                <input type="text" id="a-stock-input" placeholder="输入股票代码（如600519）或名称"
+                       onkeypress="if(event.key==='Enter') searchAStock()">
+                <button class="btn-primary" onclick="searchAStock()">查询</button>
+            </div>
+            <div class="quick-picks">
+                <span>快捷查询：</span>
+                <button onclick="quickSearchA('600519')">贵州茅台</button>
+                <button onclick="quickSearchA('000858')">五粮液</button>
+                <button onclick="quickSearchA('300750')">宁德时代</button>
+                <button onclick="quickSearchA('600036')">招商银行</button>
+                <button onclick="quickSearchA('000001')">平安银行</button>
+                <button onclick="quickSearchA('601318')">中国平安</button>
+            </div>
+            <div id="a-stock-result"></div>
+            <div id="a-stock-chart"></div>
+            <div id="a-stock-financial"></div>
+        </section>
+
+        <!-- 港股查询 -->
+        <section id="tab-hk-stock" class="tab-content">
+            <h2>港股查询</h2>
+            <div class="search-box">
+                <input type="text" id="hk-stock-input" placeholder="输入港股代码（如00700）"
+                       onkeypress="if(event.key==='Enter') searchHKStock()">
+                <button class="btn-primary" onclick="searchHKStock()">查询</button>
+            </div>
+            <div class="quick-picks">
+                <span>快捷查询：</span>
+                <button onclick="quickSearchHK('00700')">腾讯控股</button>
+                <button onclick="quickSearchHK('09988')">阿里巴巴</button>
+                <button onclick="quickSearchHK('09999')">网易</button>
+                <button onclick="quickSearchHK('01810')">小米集团</button>
+                <button onclick="quickSearchHK('03690')">美团</button>
+                <button onclick="quickSearchHK('00005')">汇丰控股</button>
+            </div>
+            <div id="hk-stock-result"></div>
+            <div id="hk-stock-chart"></div>
+            <div id="hk-stock-financial"></div>
+        </section>
+
+        <!-- 股票筛选 -->
+        <section id="tab-screener" class="tab-content">
+            <h2>A股筛选器</h2>
+            <div class="screener-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>市盈率 PE</label>
+                        <input type="number" id="pe-min" placeholder="最小">
+                        <span>~</span>
+                        <input type="number" id="pe-max" placeholder="最大">
+                    </div>
+                    <div class="form-group">
+                        <label>市净率 PB 上限</label>
+                        <input type="number" id="pb-max" placeholder="最大PB">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>总市值（亿元）</label>
+                        <input type="number" id="mv-min" placeholder="最小(亿)">
+                        <span>~</span>
+                        <input type="number" id="mv-max" placeholder="最大(亿)">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group strategy-btns">
+                        <label>快捷策略：</label>
+                        <button onclick="applyStrategy('value')">价值型</button>
+                        <button onclick="applyStrategy('growth')">成长型</button>
+                        <button onclick="applyStrategy('dividend')">高股息</button>
+                        <button onclick="applyStrategy('small_cap')">小盘股</button>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="runScreener()">开始筛选</button>
+            </div>
+            <div id="screener-result"></div>
+        </section>
+
+        <!-- AH对比 -->
+        <section id="tab-ah-compare" class="tab-content">
+            <h2>AH股溢价对比</h2>
+            <p class="description">显示同时在A股和港股上市的公司，对比两地估值差异。</p>
+            <button class="btn-primary" onclick="loadAHComparison()">加载AH股数据</button>
+            <div id="ah-result"></div>
+        </section>
+
+        <!-- 关于 -->
+        <section id="tab-about" class="tab-content">
+            <h2>关于本工具</h2>
+            <div class="about-content">
+                <h3>功能说明</h3>
+                <ul>
+                    <li><strong>市场概览</strong>：查看A股和港股主要指数、行业板块涨跌排行</li>
+                    <li><strong>A股查询</strong>：查询A股个股实时行情、历史K线和财务数据</li>
+                    <li><strong>港股查询</strong>：查询港股个股实时行情、历史数据和财务报表</li>
+                    <li><strong>股票筛选</strong>：按PE/PB/市值等条件筛选A股，内置多种策略模板</li>
+                    <li><strong>AH对比</strong>：查看AH两地上市公司的溢价率对比</li>
+                </ul>
+
+                <h3>数据来源（全部免费）</h3>
+                <table class="info-table">
+                    <tr><th>数据源</th><th>类型</th><th>覆盖范围</th></tr>
+                    <tr><td>AKShare</td><td>免费开源</td><td>A股实时/历史行情、财务数据、板块数据、资金流向</td></tr>
+                    <tr><td>Yahoo Finance</td><td>免费</td><td>港股/美股行情、财务数据、历史数据</td></tr>
+                    <tr><td>BaoStock</td><td>免费开源</td><td>A股历史行情数据（日/周/月K线）</td></tr>
+                </table>
+
+                <h3>使用方式</h3>
+                <table class="info-table">
+                    <tr><th>平台</th><th>方式</th></tr>
+                    <tr><td>Windows电脑</td><td>运行 start.bat 或 python app.py</td></tr>
+                    <tr><td>手机</td><td>电脑运行 python app.py --host 0.0.0.0，手机浏览器访问 http://电脑IP:8888</td></tr>
+                    <tr><td>网页版</td><td>部署到服务器后通过浏览器访问</td></tr>
+                </table>
+
+                <h3>免责声明</h3>
+                <p class="disclaimer">
+                    本工具仅提供公开市场数据的查询和展示功能，不构成任何投资建议。
+                    数据来源于第三方免费接口，可能存在延迟或误差。
+                    投资有风险，决策需谨慎。使用本工具产生的任何投资损失，开发者不承担责任。
+                </p>
+
+                <p class="version-info">版本: v{{ version }} | 基于 Flask + AKShare + YFinance</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>{{ app_name }} v{{ version }} | 数据源: AKShare + Yahoo Finance + BaoStock (全部免费)</p>
+        <p>⚠️ 本工具不构成投资建议，投资有风险，决策需谨慎</p>
+    </footer>
+
+    <div id="loading" class="loading-overlay" style="display:none">
+        <div class="spinner"></div>
+        <p>数据加载中...</p>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
