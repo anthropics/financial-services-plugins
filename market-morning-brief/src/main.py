@@ -2,6 +2,7 @@
 """
 市场晨报/晚报系统 - 主入口
 三地市场（A股/港股/美股）定时分析推送
+无需任何大模型，基于规则引擎自动分析
 
 调度时间表（CST, UTC+8）：
   09:00  →  A股+港股 开盘前分析（推送飞书）
@@ -21,7 +22,6 @@ import json
 import logging
 import os
 import sys
-import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -34,7 +34,7 @@ from fetchers.news_fetcher import NewsFetcher
 from fetchers.market_data import MarketDataFetcher
 from fetchers.research_fetcher import ResearchFetcher
 from fetchers.economic_calendar import EconomicCalendarFetcher
-from analyzers.claude_analyzer import ClaudeAnalyzer
+from analyzers.rule_analyzer import RuleAnalyzer
 from notifiers.feishu import FeishuNotifier
 
 # ── 日志配置 ───────────────────────────────────────────────────────────
@@ -72,10 +72,7 @@ class MarketBriefOrchestrator:
         self.market_fetcher = MarketDataFetcher()
         self.research_fetcher = ResearchFetcher()
         self.calendar_fetcher = EconomicCalendarFetcher()
-        self.analyzer = ClaudeAnalyzer(
-            api_key=config.anthropic_api_key,
-            model=config.claude_model,
-        )
+        self.analyzer = RuleAnalyzer()
         self.notifier = FeishuNotifier(
             webhook_urls=config.feishu_webhooks,
             secret=config.feishu_secret,
@@ -103,8 +100,8 @@ class MarketBriefOrchestrator:
             logger.info("正在获取经济日历...")
             events = self.calendar_fetcher.fetch_upcoming(days_ahead=3)
 
-            # 2. AI 分析
-            logger.info("正在调用 Claude 进行第一性原则分析...")
+            # 2. 规则引擎分析
+            logger.info("正在进行规则引擎分析...")
             analysis = self.analyzer.analyze_premarket(
                 market_type="asia",
                 news_items=news,
@@ -242,7 +239,7 @@ def run_scheduler(orchestrator: MarketBriefOrchestrator):
         id="premarket_asia",
         name="A股+港股开盘前分析",
         replace_existing=True,
-        misfire_grace_time=300,  # 5分钟内错过可补发
+        misfire_grace_time=300,
     )
 
     # A股+港股 收盘复盘（默认 15:30 CST，周一至周五）
@@ -261,7 +258,6 @@ def run_scheduler(orchestrator: MarketBriefOrchestrator):
     )
 
     # 美股 开盘前（默认 21:00 CST，周一至周五）
-    # 注：美国冬令时对应 22:00 CST，可通过环境变量 US_PREMARKET_HOUR 调整
     scheduler.add_job(
         orchestrator.run_premarket_us,
         CronTrigger(
@@ -294,7 +290,7 @@ def run_scheduler(orchestrator: MarketBriefOrchestrator):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="三地股市智能晨报/晚报系统",
+        description="三地股市智能晨报/晚报系统（规则引擎版，无需大模型）",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
@@ -325,8 +321,8 @@ def main():
     # 配置校验
     try:
         config.validate()
-        logger.info("配置校验通过 ✓")
-        logger.info(f"  Claude 模型: {config.claude_model}")
+        logger.info("配置校验通过")
+        logger.info(f"  分析引擎: 规则引擎（无需大模型）")
         logger.info(f"  飞书 Webhook 数量: {len(config.feishu_webhooks)}")
         logger.info(f"  关注板块: {', '.join(config.focus_sectors)}")
     except ValueError as e:
@@ -343,9 +339,9 @@ def main():
         success = orchestrator.notifier.send_alert(
             title="市场晨报系统测试",
             content=(
-                "✅ 飞书推送配置正常！\n\n"
+                "飞书推送配置正常！\n\n"
                 f"系统信息：\n"
-                f"- Claude 模型：{config.claude_model}\n"
+                f"- 分析引擎：规则引擎（零API成本）\n"
                 f"- 关注板块：{', '.join(config.focus_sectors)}\n"
                 f"- 调度时间：亚洲 {config.asia_premarket_hour:02d}:{config.asia_premarket_minute:02d} / "
                 f"复盘 {config.asia_postmarket_hour:02d}:{config.asia_postmarket_minute:02d} / "

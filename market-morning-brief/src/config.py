@@ -1,5 +1,6 @@
 """
-配置模块 - 从环境变量读取所有敏感配置
+配置模块 - 从环境变量读取所有配置
+无需任何大模型API Key
 """
 import os
 from dataclasses import dataclass, field
@@ -8,14 +9,6 @@ from typing import Optional
 
 @dataclass
 class Config:
-    # ── Anthropic / Claude ──────────────────────────────────────────
-    anthropic_api_key: str = field(
-        default_factory=lambda: os.environ.get("ANTHROPIC_API_KEY", "")
-    )
-    claude_model: str = field(
-        default_factory=lambda: os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-6")
-    )
-
     # ── 飞书 Feishu ──────────────────────────────────────────────────
     # 支持多个 webhook，逗号分隔
     feishu_webhooks: list = field(
@@ -106,8 +99,6 @@ class Config:
 
     def validate(self):
         errors = []
-        if not self.anthropic_api_key:
-            errors.append("ANTHROPIC_API_KEY 未设置")
         if not self.feishu_webhooks:
             errors.append("FEISHU_WEBHOOK_URLS 未设置（至少一个）")
         if errors:

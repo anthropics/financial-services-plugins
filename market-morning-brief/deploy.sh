@@ -1,6 +1,6 @@
 #!/bin/bash
 # ════════════════════════════════════════════════════════════════════
-#  市场晨报系统 - 一键部署脚本
+#  市场晨报系统 - 一键部署脚本（规则引擎版，无需大模型）
 #  用法：bash deploy.sh
 # ════════════════════════════════════════════════════════════════════
 set -e
@@ -18,7 +18,8 @@ error()  { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
 echo ""
 echo "╔══════════════════════════════════════════╗"
-echo "║   三地股市智能晨报/晚报系统  一键部署   ║"
+echo "║  三地股市智能晨报/晚报系统  一键部署    ║"
+echo "║  规则引擎版 · 无需大模型 · 零API成本    ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
 
@@ -54,8 +55,7 @@ if [ ! -f ".env" ]; then
     cp .env.example .env
     warn ".env 文件已创建，请填写以下必填配置："
     echo ""
-    echo "  1. ANTHROPIC_API_KEY  - Claude API密钥（https://console.anthropic.com）"
-    echo "  2. FEISHU_WEBHOOK_URLS - 飞书机器人Webhook（飞书群 > 设置 > 机器人）"
+    echo "  1. FEISHU_WEBHOOK_URLS - 飞书机器人Webhook（飞书群 > 设置 > 机器人）"
     echo ""
     echo "  编辑命令：nano .env 或 vim .env"
     echo ""
@@ -73,9 +73,6 @@ fi
 
 # 验证必填配置
 source .env 2>/dev/null || true
-if [ -z "$ANTHROPIC_API_KEY" ] || [ "$ANTHROPIC_API_KEY" = "sk-ant-api03-xxx..." ]; then
-    error "请在 .env 中设置有效的 ANTHROPIC_API_KEY"
-fi
 if [ -z "$FEISHU_WEBHOOK_URLS" ]; then
     error "请在 .env 中设置 FEISHU_WEBHOOK_URLS"
 fi
@@ -155,12 +152,18 @@ fi
 
 echo ""
 echo "════════════════════════════════════════"
-echo " 部署完成！调度时间（CST）："
+echo " 部署完成！"
+echo ""
+echo " 特点："
+echo "   无需大模型API  · 零API成本"
+echo "   规则引擎分析  · 即装即用"
+echo ""
+echo " 调度时间（CST）："
 echo "   09:00  A股+港股 开盘前分析"
 echo "   15:30  A股+港股 收盘复盘"
 echo "   21:00  美股 开盘前分析"
 echo ""
-echo " 数据来源（全部可溯源）："
+echo " 数据来源（全部免费/可溯源）："
 echo "   财联社 · 东方财富 · 新浪财经 · 新华社"
 echo "   Yahoo Finance · AKShare · 美联储 · 港交所"
 echo "   中国证监会 · 中国人民银行"
