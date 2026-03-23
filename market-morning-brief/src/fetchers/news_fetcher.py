@@ -11,9 +11,9 @@
   8. 证监会公告              http://www.csrc.gov.cn/
   9. NewsAPI（可选）         https://newsapi.org/
   10. HKEX 公告              https://www.hkex.com.hk/
-  11. Reuters 商业新闻 RSS   https://feeds.reuters.com/  ⚠️ 需美国网络
-  12. CNBC 市场新闻 RSS      https://www.cnbc.com/        ⚠️ 需美国网络
-  13. SEC EDGAR 8-K 公告     https://www.sec.gov/          ⚠️ 需美国网络
+  11. Reuters 商业新闻 RSS   https://feeds.reuters.com/  （国际网络可直连，中国大陆需代理）
+  12. CNBC 市场新闻 RSS      https://www.cnbc.com/        ⚠️ 国内被屏蔽，需代理
+  13. SEC EDGAR 8-K 公告     https://www.sec.gov/          （国际网络可直连，中国大陆通常可访问）
 """
 
 import hashlib
@@ -394,7 +394,7 @@ class NewsFetcher:
                         importance="high",
                     ))
             except Exception as e:
-                logger.debug(f"Reuters RSS {url} 失败（可能需要代理）: {e}")
+                logger.debug(f"Reuters RSS {url} 失败: {e}")
         return items
 
     # ── CNBC RSS（需美国网络）────────────────────────────────────────
@@ -431,7 +431,7 @@ class NewsFetcher:
                         importance="medium",
                     ))
             except Exception as e:
-                logger.debug(f"CNBC RSS {url} 失败（可能需要代理）: {e}")
+                logger.debug(f"CNBC RSS {url} 失败（国内需代理）: {e}")
         return items
 
     # ── SEC EDGAR 8-K 公告（需美国网络）─────────────────────────────
@@ -460,7 +460,7 @@ class NewsFetcher:
                 ))
             return items
         except Exception as e:
-            logger.debug(f"SEC EDGAR RSS 失败（可能需要代理）: {e}")
+            logger.debug(f"SEC EDGAR RSS 失败: {e}")
             return []
 
     # ── NewsAPI（可选增强）────────────────────────────────────────────

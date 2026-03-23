@@ -2,10 +2,10 @@
 市场行情数据抓取器
 数据源（全部免费/可溯源）：
   - AKShare          https://akshare.akfamily.xyz/  (A股/港股/美股，Python库)
-  - yfinance         https://github.com/ranaroussi/yfinance  (美股/港股)  ⚠️ 需美国网络
+  - yfinance         https://github.com/ranaroussi/yfinance  (美股/港股)  ⚠️ 国内被屏蔽，需代理
   - 东方财富          免费行情接口
-  - Alpha Vantage    https://www.alphavantage.co/  (美股板块轮动，免费25次/天)  ⚠️ 需美国网络
-  - CNN Fear&Greed   https://edition.cnn.com/markets/fear-and-greed  ⚠️ 需美国网络
+  - Alpha Vantage    https://www.alphavantage.co/  (美股板块轮动，免费25次/天，国际网络可直连)
+  - CNN Fear&Greed   https://edition.cnn.com/markets/fear-and-greed  ⚠️ 国内被屏蔽，需代理
 """
 
 import logging
@@ -316,7 +316,7 @@ class MarketDataFetcher:
                     "source_url": "https://edition.cnn.com/markets/fear-and-greed",
                 }
         except Exception as e:
-            logger.debug(f"恐惧贪婪指数获取失败（可能需要代理）: {e}")
+            logger.debug(f"恐惧贪婪指数获取失败（国内需代理）: {e}")
 
         # Alpha Vantage 美股板块轮动（需美国网络或代理，免费 25 次/天）
         if self._alpha_vantage_key and self._alpha_vantage_key != "demo":
@@ -344,7 +344,7 @@ class MarketDataFetcher:
                             pass
                     logger.debug(f"Alpha Vantage 板块数据：{len(result['sectors'])} 个板块")
             except Exception as e:
-                logger.debug(f"Alpha Vantage 板块获取失败（可能需要代理）: {e}")
+                logger.debug(f"Alpha Vantage 板块获取失败: {e}")
 
         return result
 
