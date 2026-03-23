@@ -421,17 +421,24 @@ class RuleAnalyzer:
             data = market_data.get(market_key, {})
             if not data:
                 continue
-            indices = data.get("indices", {})
-            for idx_name, idx_data in indices.items():
-                if isinstance(idx_data, dict):
-                    change_pct = idx_data.get("change_pct")
-                    if change_pct is not None:
-                        direction = "涨" if change_pct > 0 else "跌"
-                        parts.append(f"{idx_name}{direction}{abs(change_pct):.2f}%")
-                        break
-
-        if parts:
-            return f"{market_label}盘前：{'; '.join(parts[:4])}。" + (
+            indices = data.get("indices", [])
+            if isinstance(indices, list):
+                for idx_data in indices:
+                    if isinstance(idx_data, dict):
+                        idx_name = idx_data.get("name", "")
+                        change_pct = idx_data.get("change_pct")
+                        if change_pct is not None:
+                            direction = "涨" if change_pct > 0 else "跌"
+                            parts.append(f"{idx_name}{direction}{abs(change_pct):.2f}%")
+                            break
+            else:
+                for idx_name, idx_data in indices.items():
+                    if isinstance(idx_data, dict):
+                        change_pct = idx_data.get("change_pct")
+                        if change_pct is not None:
+                            direction = "涨" if change_pct > 0 else "跌"
+                            parts.append(f"{idx_name}{direction}{abs(change_pct):.2f}%")
+                            break
                 f"今日有{len(key_events)}条重要事件值得关注。" if key_events else ""
             )
         return f"{market_label}盘前概览：数据采集中，请关注各项指标变化。"
@@ -443,14 +450,24 @@ class RuleAnalyzer:
             data = market_data.get(market_key, {})
             if not data:
                 continue
-            indices = data.get("indices", {})
-            for idx_name, idx_data in indices.items():
-                if isinstance(idx_data, dict):
-                    change_pct = idx_data.get("change_pct")
-                    if change_pct is not None:
-                        direction = "涨" if change_pct > 0 else "跌"
-                        parts.append(f"{idx_name}{direction}{abs(change_pct):.2f}%")
-                        break
+            indices = data.get("indices", [])
+            if isinstance(indices, list):
+                for idx_data in indices:
+                    if isinstance(idx_data, dict):
+                        idx_name = idx_data.get("name", "")
+                        change_pct = idx_data.get("change_pct")
+                        if change_pct is not None:
+                            direction = "涨" if change_pct > 0 else "跌"
+                            parts.append(f"{idx_name}{direction}{abs(change_pct):.2f}%")
+                            break
+            else:
+                for idx_name, idx_data in indices.items():
+                    if isinstance(idx_data, dict):
+                        change_pct = idx_data.get("change_pct")
+                        if change_pct is not None:
+                            direction = "涨" if change_pct > 0 else "跌"
+                            parts.append(f"{idx_name}{direction}{abs(change_pct):.2f}%")
+                            break
 
         if parts:
             return f"{market_label}收盘：{'; '.join(parts[:4])}。"
