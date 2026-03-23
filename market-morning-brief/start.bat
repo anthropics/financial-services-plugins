@@ -29,7 +29,7 @@ if errorlevel 1 (
 if not exist cache mkdir cache
 
 :: ── 显示调度计划 ─────────────────────────────────────────────────────
-powershell -NoProfile -Command "Write-Host '  Schedule (Beijing CST):'; Write-Host '   09:00  A股+港股 开盘前分析 -> 推送飞书'; Write-Host '   15:30  A股+港股 收盘复盘   -> 推送飞书'; Write-Host '   21:00  美股 开盘前分析     -> 推送飞书'"
+powershell -NoProfile -Command "Write-Host '  Schedule (Beijing CST):'; Write-Host '   09:00  A股+港股 开盘前分析 -> 推送飞书'; Write-Host '   16:30  A股+港股 收盘复盘   -> 推送飞书'; Write-Host '   21:00  美股 开盘前分析     -> 推送飞书'"
 echo.
 echo  注意：关闭此窗口将停止推送！
 echo  如需后台运行，请使用 start_background.bat
