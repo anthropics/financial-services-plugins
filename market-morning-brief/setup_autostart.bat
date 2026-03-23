@@ -3,7 +3,7 @@ chcp 65001 > nul
 setlocal
 
 echo.
-echo ── 设置 Windows 开机自启动 ──────────────────────────────
+echo -- 设置 Windows 开机自启动 ------------------------------
 echo.
 echo  此操作将在 Windows 开机时自动启动市场晨报后台服务。
 echo  设置后，每次登录 Windows 即自动开始推送。
