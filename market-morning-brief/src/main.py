@@ -112,18 +112,34 @@ class MarketBriefOrchestrator:
             logger.info("正在获取经济日历...")
             events = self.calendar_fetcher.fetch_upcoming(days_ahead=3)
 
-            # 2. 规则引擎分析
-            logger.info("正在进行规则引擎分析...")
-            analysis = self.analyzer.analyze_premarket(
-                market_type="asia",
-                news_items=news,
-                market_data=market_data,
-                research_reports=reports,
-                economic_events=events,
-                focus_sectors=config.focus_sectors,
-                watchlist=config.watchlist,
-                yesterday_strategy=self._last_strategy.get("asia_postmarket"),
-            )
+            # 2. 分析（Claude 失败时自动降级到规则引擎）
+            logger.info("正在进行分析...")
+            try:
+                analysis = self.analyzer.analyze_premarket(
+                    market_type="asia",
+                    news_items=news,
+                    market_data=market_data,
+                    research_reports=reports,
+                    economic_events=events,
+                    focus_sectors=config.focus_sectors,
+                    watchlist=config.watchlist,
+                    yesterday_strategy=self._last_strategy.get("asia_postmarket"),
+                )
+            except Exception as e:
+                if isinstance(self.analyzer, ClaudeAnalyzer):
+                    logger.warning(f"Claude 分析失败（{e}），降级到规则引擎")
+                    analysis = RuleAnalyzer().analyze_premarket(
+                        market_type="asia",
+                        news_items=news,
+                        market_data=market_data,
+                        research_reports=reports,
+                        economic_events=events,
+                        focus_sectors=config.focus_sectors,
+                        watchlist=config.watchlist,
+                        yesterday_strategy=self._last_strategy.get("asia_postmarket"),
+                    )
+                else:
+                    raise
 
             # 3. 推送飞书
             logger.info("正在推送飞书...")
@@ -149,13 +165,26 @@ class MarketBriefOrchestrator:
             hk_data = self.market_fetcher.fetch_market_overview("hk")
             market_data = {"cn": cn_data, "hk": hk_data}
 
-            analysis = self.analyzer.analyze_postmarket(
-                market_type="asia",
-                market_data=market_data,
-                news_items=news,
-                morning_strategy=self._last_strategy.get("asia_premarket"),
-                focus_sectors=config.focus_sectors,
-            )
+            try:
+                analysis = self.analyzer.analyze_postmarket(
+                    market_type="asia",
+                    market_data=market_data,
+                    news_items=news,
+                    morning_strategy=self._last_strategy.get("asia_premarket"),
+                    focus_sectors=config.focus_sectors,
+                )
+            except Exception as e:
+                if isinstance(self.analyzer, ClaudeAnalyzer):
+                    logger.warning(f"Claude 分析失败（{e}），降级到规则引擎")
+                    analysis = RuleAnalyzer().analyze_postmarket(
+                        market_type="asia",
+                        market_data=market_data,
+                        news_items=news,
+                        morning_strategy=self._last_strategy.get("asia_premarket"),
+                        focus_sectors=config.focus_sectors,
+                    )
+                else:
+                    raise
 
             success = self.notifier.send_postmarket_report(analysis, "A股+港股")
             self._save_strategy("asia_postmarket", analysis.trading_strategy)
@@ -185,16 +214,32 @@ class MarketBriefOrchestrator:
             reports = self.research_fetcher.fetch_recent(hours=12)
             events = self.calendar_fetcher.fetch_upcoming(days_ahead=2)
 
-            analysis = self.analyzer.analyze_premarket(
-                market_type="us",
-                news_items=news,
-                market_data=market_data,
-                research_reports=reports,
-                economic_events=events,
-                focus_sectors=config.focus_sectors,
-                watchlist=config.watchlist,
-                yesterday_strategy=self._last_strategy.get("us_premarket"),
-            )
+            try:
+                analysis = self.analyzer.analyze_premarket(
+                    market_type="us",
+                    news_items=news,
+                    market_data=market_data,
+                    research_reports=reports,
+                    economic_events=events,
+                    focus_sectors=config.focus_sectors,
+                    watchlist=config.watchlist,
+                    yesterday_strategy=self._last_strategy.get("us_premarket"),
+                )
+            except Exception as e:
+                if isinstance(self.analyzer, ClaudeAnalyzer):
+                    logger.warning(f"Claude 分析失败（{e}），降级到规则引擎")
+                    analysis = RuleAnalyzer().analyze_premarket(
+                        market_type="us",
+                        news_items=news,
+                        market_data=market_data,
+                        research_reports=reports,
+                        economic_events=events,
+                        focus_sectors=config.focus_sectors,
+                        watchlist=config.watchlist,
+                        yesterday_strategy=self._last_strategy.get("us_premarket"),
+                    )
+                else:
+                    raise
 
             success = self.notifier.send_premarket_report(analysis, "美股")
             self._save_strategy("us_premarket", analysis.trading_strategy)

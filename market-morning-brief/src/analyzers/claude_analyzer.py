@@ -311,17 +311,7 @@ class ClaudeAnalyzer:
             )
         except Exception as e:
             logger.error(f"Claude API 调用失败: {e}")
-            # 返回降级结果
-            return AnalysisResult(
-                report_type=report_type,
-                generated_at=datetime.now(CST),
-                market_summary=f"分析生成失败: {str(e)[:100]}",
-                key_events=[], sector_outlook=[], watchlist=[],
-                trading_strategy="数据获取异常，请手动查阅市场信息。",
-                risk_warnings=["系统异常，分析结果不可用"],
-                review_of_yesterday=None,
-                raw_response=str(e),
-            )
+            raise  # 让调用方决定是否降级到规则引擎
 
     @staticmethod
     def _extract_json(text: str) -> dict:
