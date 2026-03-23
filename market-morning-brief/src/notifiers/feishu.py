@@ -420,31 +420,6 @@ class FeishuNotifier:
                 logger.error(f"[Webhook] 推送异常: {e}")
         return success_count > 0
 
-    def _send_text(self, text: str) -> bool:
-        """发送纯文本消息（降级方案，仅 Webhook 模式）"""
-        if self.app_mode:
-            # API 模式走单独文本接口（简化处理，将文本包装为卡片）
-            card = {
-                "config": {"wide_screen_mode": False},
-                "elements": [{"tag": "div", "text": {"tag": "plain_text", "content": text}}],
-            }
-            return self._send_card_via_api(card)
-
-        payload = {"msg_type": "text", "content": {"text": text}}
-        if self.secret:
-            ts, sign = self._generate_sign(self.secret)
-            payload["timestamp"] = ts
-            payload["sign"] = sign
-
-        for url in self.webhook_urls:
-            try:
-                r = requests.post(url, json=payload, timeout=self.TIMEOUT)
-                if r.status_code == 200:
-                    return True
-            except Exception as e:
-                logger.error(f"飞书文本推送失败: {e}")
-        return False
-
     @staticmethod
     def _generate_sign(secret: str) -> tuple[str, str]:
         """飞书签名校验"""
