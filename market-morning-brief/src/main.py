@@ -6,7 +6,7 @@
 
 调度时间表（CST, UTC+8）：
   09:00  →  A股+港股 开盘前分析（推送飞书）
-  15:30  →  A股+港股 收盘复盘（推送飞书）
+  16:30  →  A股+港股 收盘复盘（港股16:00收盘，推送飞书）
   21:00  →  美股 开盘前分析（推送飞书）
 
 运行方式：
@@ -286,7 +286,7 @@ def _catchup_missed_jobs(orchestrator: MarketBriefOrchestrator, now: datetime):
     if now.weekday() >= 5:   # 周六/日不补跑
         return
 
-    GRACE_HOURS = 2
+    GRACE_HOURS = 5  # 收盘后5小时内均可补跑
 
     jobs = [
         # (计划小时, 计划分钟, 任务函数, 任务名)
@@ -317,10 +317,10 @@ def run_scheduler(orchestrator: MarketBriefOrchestrator):
 
     scheduler = BlockingScheduler(timezone="Asia/Shanghai")
 
-    # misfire_grace_time=7200：容忍最多 2 小时的延迟
+    # misfire_grace_time=18000：容忍最多 5 小时的延迟
     # 解决：电脑晚开机、从睡眠唤醒、程序晚启动等场景下任务被跳过的问题
     # coalesce=True：多次积压的 misfire 只补跑一次，防止重复推送
-    GRACE = 7200
+    GRACE = 18000
 
     # A股+港股 开盘前（默认 09:00 CST，周一至周五）
     scheduler.add_job(

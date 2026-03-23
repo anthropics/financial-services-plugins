@@ -54,9 +54,9 @@ class Config:
     asia_premarket_minute: int = field(
         default_factory=lambda: int(os.environ.get("ASIA_PREMARKET_MINUTE", "0"))
     )
-    # A股+港股 收盘后30分钟复盘
+    # A股+港股 收盘复盘（港股16:00收盘，默认16:30推送）
     asia_postmarket_hour: int = field(
-        default_factory=lambda: int(os.environ.get("ASIA_POSTMARKET_HOUR", "15"))
+        default_factory=lambda: int(os.environ.get("ASIA_POSTMARKET_HOUR", "16"))
     )
     asia_postmarket_minute: int = field(
         default_factory=lambda: int(os.environ.get("ASIA_POSTMARKET_MINUTE", "30"))
