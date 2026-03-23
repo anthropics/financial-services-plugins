@@ -229,6 +229,39 @@ class MarketBriefOrchestrator:
 
 
 # ══════════════════════════════════════════════════════════════════════
+#  启动补跑：程序晚启动时立即执行今日已错过的任务
+# ══════════════════════════════════════════════════════════════════════
+
+def _catchup_missed_jobs(orchestrator: MarketBriefOrchestrator, now: datetime):
+    """
+    调度器启动时检查今日是否有任务在过去 2 小时内被错过。
+    若是工作日且当前时间落在 [scheduled_time, scheduled_time+2h] 区间，则立即补跑一次。
+    这解决了电脑晚开机 / 从睡眠唤醒 / 程序晚启动导致的漏推问题。
+    """
+    if now.weekday() >= 5:   # 周六/日不补跑
+        return
+
+    GRACE_HOURS = 2
+
+    jobs = [
+        # (计划小时, 计划分钟, 任务函数, 任务名)
+        (config.asia_premarket_hour,  config.asia_premarket_minute,  orchestrator.run_premarket_asia,  "A股+港股开盘前分析"),
+        (config.asia_postmarket_hour, config.asia_postmarket_minute, orchestrator.run_postmarket_asia, "A股+港股收盘复盘"),
+        (config.us_premarket_hour,    config.us_premarket_minute,    orchestrator.run_premarket_us,    "美股开盘前分析"),
+    ]
+
+    for hour, minute, func, name in jobs:
+        scheduled = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        delta_minutes = (now - scheduled).total_seconds() / 60
+        if 0 < delta_minutes <= GRACE_HOURS * 60:
+            logger.info(f"[补跑] {name} 计划 {hour:02d}:{minute:02d}，已过 {delta_minutes:.0f} 分钟，立即执行")
+            try:
+                func()
+            except Exception as e:
+                logger.error(f"[补跑] {name} 执行失败: {e}")
+
+
+# ══════════════════════════════════════════════════════════════════════
 #  调度器
 # ══════════════════════════════════════════════════════════════════════
 
@@ -238,6 +271,11 @@ def run_scheduler(orchestrator: MarketBriefOrchestrator):
     from apscheduler.triggers.cron import CronTrigger
 
     scheduler = BlockingScheduler(timezone="Asia/Shanghai")
+
+    # misfire_grace_time=7200：容忍最多 2 小时的延迟
+    # 解决：电脑晚开机、从睡眠唤醒、程序晚启动等场景下任务被跳过的问题
+    # coalesce=True：多次积压的 misfire 只补跑一次，防止重复推送
+    GRACE = 7200
 
     # A股+港股 开盘前（默认 09:00 CST，周一至周五）
     scheduler.add_job(
@@ -251,7 +289,8 @@ def run_scheduler(orchestrator: MarketBriefOrchestrator):
         id="premarket_asia",
         name="A股+港股开盘前分析",
         replace_existing=True,
-        misfire_grace_time=300,
+        misfire_grace_time=GRACE,
+        coalesce=True,
     )
 
     # A股+港股 收盘复盘（默认 15:30 CST，周一至周五）
@@ -266,7 +305,8 @@ def run_scheduler(orchestrator: MarketBriefOrchestrator):
         id="postmarket_asia",
         name="A股+港股收盘复盘",
         replace_existing=True,
-        misfire_grace_time=300,
+        misfire_grace_time=GRACE,
+        coalesce=True,
     )
 
     # 美股 开盘前（默认 21:00 CST，周一至周五）
@@ -281,7 +321,8 @@ def run_scheduler(orchestrator: MarketBriefOrchestrator):
         id="premarket_us",
         name="美股开盘前分析",
         replace_existing=True,
-        misfire_grace_time=300,
+        misfire_grace_time=GRACE,
+        coalesce=True,
     )
 
     now = datetime.now(CST)
@@ -289,6 +330,9 @@ def run_scheduler(orchestrator: MarketBriefOrchestrator):
     logger.info(f"  A股+港股 开盘前: 每周一至五 {config.asia_premarket_hour:02d}:{config.asia_premarket_minute:02d} CST")
     logger.info(f"  A股+港股 收盘复盘: 每周一至五 {config.asia_postmarket_hour:02d}:{config.asia_postmarket_minute:02d} CST")
     logger.info(f"  美股 开盘前: 每周一至五 {config.us_premarket_hour:02d}:{config.us_premarket_minute:02d} CST")
+
+    # 启动时补跑：检查今日是否有任务在 2 小时内被错过，有则立即执行
+    _catchup_missed_jobs(orchestrator, now)
 
     try:
         scheduler.start()

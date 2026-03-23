@@ -37,10 +37,10 @@ if exist .env (
 
 :: ── 显示最新日志 ─────────────────────────────────────────────────────
 echo.
-if exist cache\market_brief.log (
+if exist "%~dp0cache\market_brief.log" (
     echo  最近 10 行日志：
     echo  ────────────────────────────────────────
-    powershell -Command "Get-Content 'cache\market_brief.log' -Tail 10 | ForEach-Object { '  ' + $_ }"
+    powershell -Command "Get-Content '%~dp0cache\market_brief.log' -Tail 10 | ForEach-Object { '  ' + $_ }"
 ) else (
     echo  日志文件尚未生成（服务未运行或首次启动）
 )
