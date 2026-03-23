@@ -90,7 +90,12 @@ class MarketBriefOrchestrator:
         self.notifier = FeishuNotifier(
             webhook_urls=config.feishu_webhooks,
             secret=config.feishu_secret,
+            app_id=config.feishu_app_id,
+            app_secret=config.feishu_app_secret,
+            chat_ids=config.feishu_chat_ids,
         )
+        mode = "自建应用 API（可收发）" if config.feishu_app_mode else "Webhook（仅发送）"
+        logger.info(f"飞书发送模式：{mode}")
         self._last_strategy: dict = self._load_last_strategy()
 
     # ── 任务1：亚洲盘前分析 ─────────────────────────────────────────────
@@ -435,7 +440,10 @@ def main():
             logger.info(f"  分析引擎: Claude 大模型（{config.claude_model}）")
         else:
             logger.warning("  分析引擎: 规则引擎（未配置 ANTHROPIC_API_KEY，分析质量较低）")
-        logger.info(f"  飞书 Webhook 数量: {len(config.feishu_webhooks)}")
+        if config.feishu_app_mode:
+            logger.info(f"  飞书模式: 自建应用（app_id={config.feishu_app_id[:8]}...，推送 {len(config.feishu_chat_ids)} 个群）")
+        else:
+            logger.info(f"  飞书模式: Webhook（{len(config.feishu_webhooks)} 个）")
         logger.info(f"  关注板块: {', '.join(config.focus_sectors)}")
     except ValueError as e:
         logger.error(str(e))

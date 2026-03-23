@@ -1,12 +1,14 @@
 """
 飞书通知模块
-支持：
-  1. 飞书机器人 Webhook（最简单，群内机器人）
-  2. 飞书消息卡片（富文本，颜色/图标/按钮）
-  3. 签名校验（可选，提升安全性）
+支持两种发送方式：
+  1. 自建应用 API（推荐，可发可收，与 Q&A 机器人统一为一个机器人）
+     需要：FEISHU_APP_ID + FEISHU_APP_SECRET + FEISHU_CHAT_IDS
+  2. 群自定义机器人 Webhook（仅发送，配置更简单）
+     需要：FEISHU_WEBHOOK_URLS
 
-飞书机器人接入文档：
-https://open.feishu.cn/document/client-docs/bot-v3/add-custom-bot
+飞书开放平台文档：
+  自建应用：https://open.feishu.cn/document/home/develop-a-bot-in-5-minutes/create-an-app
+  Webhook：https://open.feishu.cn/document/client-docs/bot-v3/add-custom-bot
 """
 
 import base64
@@ -23,17 +25,65 @@ import requests
 logger = logging.getLogger(__name__)
 CST = timezone(timedelta(hours=8))
 
+# 飞书开放平台 API 地址
+_FEISHU_API_BASE = "https://open.feishu.cn/open-apis"
+
 
 class FeishuNotifier:
-    """飞书消息推送器，支持多 Webhook"""
+    """
+    飞书消息推送器
+    自动选择发送方式：
+      - 优先使用自建应用 API（需要 app_id + app_secret + chat_ids）
+      - 降级使用 Webhook（需要 webhook_urls）
+    """
 
     TIMEOUT = 15
 
-    def __init__(self, webhook_urls: list[str], secret: Optional[str] = None):
-        if not webhook_urls:
-            raise ValueError("至少需要一个飞书 Webhook URL")
-        self.webhook_urls = webhook_urls
+    def __init__(
+        self,
+        webhook_urls: Optional[list[str]] = None,
+        secret: Optional[str] = None,
+        app_id: Optional[str] = None,
+        app_secret: Optional[str] = None,
+        chat_ids: Optional[list[str]] = None,
+    ):
+        self.webhook_urls = webhook_urls or []
         self.secret = secret
+        self.app_id = app_id
+        self.app_secret = app_secret
+        self.chat_ids = chat_ids or []
+        self._token_cache: tuple[str, float] = ("", 0.0)  # (token, expire_at)
+
+        if not self.app_mode and not self.webhook_urls:
+            raise ValueError("至少需要配置自建应用（app_id+app_secret+chat_ids）或 Webhook URL")
+
+    @property
+    def app_mode(self) -> bool:
+        """是否使用自建应用模式"""
+        return bool(self.app_id and self.app_secret and self.chat_ids)
+
+    # ── tenant_access_token 管理 ────────────────────────────────────
+
+    def _get_tenant_access_token(self) -> str:
+        """获取 tenant_access_token，自动缓存（有效期2小时，提前5分钟刷新）"""
+        token, expire_at = self._token_cache
+        if token and time.time() < expire_at - 300:
+            return token
+
+        resp = requests.post(
+            f"{_FEISHU_API_BASE}/auth/v3/tenant_access_token/internal",
+            json={"app_id": self.app_id, "app_secret": self.app_secret},
+            timeout=self.TIMEOUT,
+        )
+        data = resp.json()
+        if data.get("code") != 0:
+            raise RuntimeError(f"获取 tenant_access_token 失败: {data}")
+
+        new_token = data["tenant_access_token"]
+        expire_in = data.get("expire", 7200)
+        self._token_cache = (new_token, time.time() + expire_in)
+        logger.debug("[Feishu] tenant_access_token 已刷新")
+        return new_token
 
     # ── 主发送方法 ─────────────────────────────────────────────────────
 
@@ -297,7 +347,51 @@ class FeishuNotifier:
     # ── 发送逻辑 ───────────────────────────────────────────────────────
 
     def _send_card(self, card: dict) -> bool:
-        """发送消息卡片到所有 Webhook"""
+        """发送消息卡片：自建应用模式优先，降级到 Webhook"""
+        if self.app_mode:
+            return self._send_card_via_api(card)
+        return self._send_card_via_webhook(card)
+
+    def _send_card_via_api(self, card: dict) -> bool:
+        """通过自建应用 API 发送消息卡片（支持多群）"""
+        try:
+            token = self._get_tenant_access_token()
+        except Exception as e:
+            logger.error(f"[Feishu API] 获取 token 失败: {e}，尝试降级到 Webhook")
+            if self.webhook_urls:
+                return self._send_card_via_webhook(card)
+            return False
+
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json; charset=utf-8",
+        }
+        success_count = 0
+        for chat_id in self.chat_ids:
+            payload = {
+                "receive_id": chat_id,
+                "msg_type": "interactive",
+                "content": json.dumps(card, ensure_ascii=False),
+            }
+            try:
+                r = requests.post(
+                    f"{_FEISHU_API_BASE}/im/v1/messages?receive_id_type=chat_id",
+                    headers=headers,
+                    json=payload,
+                    timeout=self.TIMEOUT,
+                )
+                data = r.json()
+                if data.get("code") == 0:
+                    logger.info(f"[Feishu API] 推送成功 → chat_id={chat_id[:12]}...")
+                    success_count += 1
+                else:
+                    logger.error(f"[Feishu API] 推送失败: {data}")
+            except Exception as e:
+                logger.error(f"[Feishu API] 推送异常: {e}")
+        return success_count > 0
+
+    def _send_card_via_webhook(self, card: dict) -> bool:
+        """通过 Webhook 发送消息卡片（群自定义机器人）"""
         payload = {
             "msg_type": "interactive",
             "card": card,
@@ -318,16 +412,24 @@ class FeishuNotifier:
                 )
                 resp = r.json()
                 if resp.get("code") == 0 or resp.get("StatusCode") == 0:
-                    logger.info(f"飞书推送成功: {url[:50]}...")
+                    logger.info(f"[Webhook] 推送成功: {url[:50]}...")
                     success_count += 1
                 else:
-                    logger.error(f"飞书推送失败: {resp}")
+                    logger.error(f"[Webhook] 推送失败: {resp}")
             except Exception as e:
-                logger.error(f"飞书推送异常: {e}")
+                logger.error(f"[Webhook] 推送异常: {e}")
         return success_count > 0
 
     def _send_text(self, text: str) -> bool:
-        """发送纯文本消息（降级方案）"""
+        """发送纯文本消息（降级方案，仅 Webhook 模式）"""
+        if self.app_mode:
+            # API 模式走单独文本接口（简化处理，将文本包装为卡片）
+            card = {
+                "config": {"wide_screen_mode": False},
+                "elements": [{"tag": "div", "text": {"tag": "plain_text", "content": text}}],
+            }
+            return self._send_card_via_api(card)
+
         payload = {"msg_type": "text", "content": {"text": text}}
         if self.secret:
             ts, sign = self._generate_sign(self.secret)

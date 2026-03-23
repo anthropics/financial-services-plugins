@@ -13,6 +13,7 @@ _ROOT = Path(__file__).parent.parent
 @dataclass
 class Config:
     # ── 飞书 Feishu ──────────────────────────────────────────────────
+    # 模式一：群自定义机器人 Webhook（只能发，不能收）
     # 支持多个 webhook，逗号分隔
     feishu_webhooks: list = field(
         default_factory=lambda: [
@@ -23,6 +24,23 @@ class Config:
     )
     feishu_secret: Optional[str] = field(
         default_factory=lambda: os.environ.get("FEISHU_SECRET")
+    )
+
+    # 模式二：自建应用（可发可收，与 Q&A 机器人统一为一个机器人）
+    # 在飞书开放平台 (open.feishu.cn) 创建自建应用后获取
+    feishu_app_id: Optional[str] = field(
+        default_factory=lambda: os.environ.get("FEISHU_APP_ID")
+    )
+    feishu_app_secret: Optional[str] = field(
+        default_factory=lambda: os.environ.get("FEISHU_APP_SECRET")
+    )
+    # 要推送消息的群 chat_id，逗号分隔（在群设置中获取，或通过 API 查询）
+    feishu_chat_ids: list = field(
+        default_factory=lambda: [
+            c.strip()
+            for c in os.environ.get("FEISHU_CHAT_IDS", "").split(",")
+            if c.strip()
+        ]
     )
 
     # ── Anthropic API Key（用于 Claude 大模型分析）────────────────────
@@ -127,10 +145,19 @@ class Config:
         )
     )
 
+    @property
+    def feishu_app_mode(self) -> bool:
+        """是否使用自建应用模式（app_id + app_secret + chat_id）"""
+        return bool(self.feishu_app_id and self.feishu_app_secret and self.feishu_chat_ids)
+
     def validate(self):
         errors = []
-        if not self.feishu_webhooks:
-            errors.append("FEISHU_WEBHOOK_URLS 未设置（至少一个）")
+        if not self.feishu_app_mode and not self.feishu_webhooks:
+            errors.append(
+                "请配置飞书发送方式（二选一）：\n"
+                "    方式一（自建应用，可收发）：FEISHU_APP_ID + FEISHU_APP_SECRET + FEISHU_CHAT_IDS\n"
+                "    方式二（Webhook，仅发送）：FEISHU_WEBHOOK_URLS"
+            )
         if errors:
             raise ValueError("配置错误：\n" + "\n".join(f"  - {e}" for e in errors))
         return self
