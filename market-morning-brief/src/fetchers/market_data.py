@@ -1,10 +1,11 @@
 """
 市场行情数据抓取器
 数据源（全部免费/可溯源）：
-  - AKShare     https://akshare.akfamily.xyz/  (A股/港股/美股，Python库)
-  - yfinance    https://github.com/ranaroussi/yfinance  (美股/港股)
-  - BaoStock    http://baostock.com/  (A股历史数据，免费注册)
-  - 东方财富    免费行情接口
+  - AKShare          https://akshare.akfamily.xyz/  (A股/港股/美股，Python库)
+  - yfinance         https://github.com/ranaroussi/yfinance  (美股/港股)  ⚠️ 需美国网络
+  - 东方财富          免费行情接口
+  - Alpha Vantage    https://www.alphavantage.co/  (美股板块轮动，免费25次/天)  ⚠️ 需美国网络
+  - CNN Fear&Greed   https://edition.cnn.com/markets/fear-and-greed  ⚠️ 需美国网络
 """
 
 import logging
@@ -63,9 +64,10 @@ class SectorPerformance:
 class MarketDataFetcher:
     """抓取三地市场指数、板块、北向资金等行情数据"""
 
-    def __init__(self):
+    def __init__(self, alpha_vantage_key: str = ""):
         self._akshare_available = self._check_akshare()
         self._yfinance_available = self._check_yfinance()
+        self._alpha_vantage_key = alpha_vantage_key
 
     # ── 主入口 ─────────────────────────────────────────────────────────
 
@@ -296,7 +298,7 @@ class MarketDataFetcher:
             except Exception as e:
                 logger.debug(f"yfinance 失败: {e}")
 
-        # 恐惧贪婪指数（CNN，免费）
+        # 恐惧贪婪指数（CNN，需美国网络）
         try:
             import requests
             r = requests.get(
@@ -314,7 +316,35 @@ class MarketDataFetcher:
                     "source_url": "https://edition.cnn.com/markets/fear-and-greed",
                 }
         except Exception as e:
-            logger.debug(f"恐惧贪婪指数获取失败: {e}")
+            logger.debug(f"恐惧贪婪指数获取失败（可能需要代理）: {e}")
+
+        # Alpha Vantage 美股板块轮动（需美国网络或代理，免费 25 次/天）
+        if self._alpha_vantage_key and self._alpha_vantage_key != "demo":
+            try:
+                import requests as _req
+                r = _req.get(
+                    "https://www.alphavantage.co/query",
+                    params={"function": "SECTOR", "apikey": self._alpha_vantage_key},
+                    timeout=15,
+                )
+                data = r.json()
+                # 取"1 Day"板块涨跌数据
+                day_perf = data.get("Rank A: Real-Time Performance", {})
+                if day_perf:
+                    for sector_name, change_str in day_perf.items():
+                        try:
+                            change_pct = float(change_str.strip("%"))
+                            result["sectors"].append(SectorPerformance(
+                                name=sector_name,
+                                change_pct=change_pct,
+                                leading_stocks=[],
+                                source="Alpha Vantage",
+                            ).to_dict())
+                        except ValueError:
+                            pass
+                    logger.debug(f"Alpha Vantage 板块数据：{len(result['sectors'])} 个板块")
+            except Exception as e:
+                logger.debug(f"Alpha Vantage 板块获取失败（可能需要代理）: {e}")
 
         return result
 

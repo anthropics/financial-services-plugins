@@ -11,6 +11,9 @@
   8. 证监会公告              http://www.csrc.gov.cn/
   9. NewsAPI（可选）         https://newsapi.org/
   10. HKEX 公告              https://www.hkex.com.hk/
+  11. Reuters 商业新闻 RSS   https://feeds.reuters.com/  ⚠️ 需美国网络
+  12. CNBC 市场新闻 RSS      https://www.cnbc.com/        ⚠️ 需美国网络
+  13. SEC EDGAR 8-K 公告     https://www.sec.gov/          ⚠️ 需美国网络
 """
 
 import hashlib
@@ -91,6 +94,10 @@ class NewsFetcher:
             self._fetch_pbc_news,
             self._fetch_csrc_news,
             self._fetch_hkex_news,
+            # 以下需美国网络（配置 HTTP_PROXY/HTTPS_PROXY 后生效，无代理时自动跳过）
+            self._fetch_reuters_rss,
+            self._fetch_cnbc_rss,
+            self._fetch_sec_edgar_rss,
         ]
         if self.newsapi_key:
             sources.append(self._fetch_newsapi)
@@ -357,6 +364,103 @@ class NewsFetcher:
             return items
         except Exception as e:
             logger.debug(f"港交所公告抓取失败: {e}")
+            return []
+
+    # ── Reuters RSS（需美国网络）─────────────────────────────────────
+
+    def _fetch_reuters_rss(self) -> list[NewsItem]:
+        """Reuters 商业/市场新闻 RSS（需美国网络或代理）"""
+        feeds = [
+            ("https://feeds.reuters.com/reuters/businessNews", "Reuters-商业"),
+            ("https://feeds.reuters.com/reuters/companyNews",  "Reuters-公司"),
+        ]
+        items = []
+        for url, source_name in feeds:
+            try:
+                feed = feedparser.parse(url)
+                if not feed.entries:
+                    continue
+                for entry in feed.entries[:15]:
+                    pub = self._parse_rss_date(entry)
+                    title = entry.get("title", "")
+                    summary = entry.get("summary", "")
+                    items.append(NewsItem(
+                        title=title[:200],
+                        summary=summary[:500],
+                        source=source_name,
+                        source_url=entry.get("link", "https://www.reuters.com/"),
+                        published_at=pub,
+                        category=self._classify(title + " " + summary),
+                        importance="high",
+                    ))
+            except Exception as e:
+                logger.debug(f"Reuters RSS {url} 失败（可能需要代理）: {e}")
+        return items
+
+    # ── CNBC RSS（需美国网络）────────────────────────────────────────
+
+    def _fetch_cnbc_rss(self) -> list[NewsItem]:
+        """CNBC 市场/经济新闻 RSS（需美国网络或代理）"""
+        feeds = [
+            ("https://www.cnbc.com/id/100003114/device/rss/rss.html", "CNBC-美股"),
+            ("https://www.cnbc.com/id/20409666/device/rss/rss.html",  "CNBC-全球经济"),
+        ]
+        items = []
+        for url, source_name in feeds:
+            try:
+                feed = feedparser.parse(url)
+                if not feed.entries:
+                    continue
+                for entry in feed.entries[:15]:
+                    pub = self._parse_rss_date(entry)
+                    title = entry.get("title", "")
+                    summary = entry.get("summary", "")
+                    # 去掉 CNBC summary 中的 HTML 标签
+                    if summary:
+                        try:
+                            summary = BeautifulSoup(summary, "html.parser").get_text()[:500]
+                        except Exception:
+                            summary = summary[:500]
+                    items.append(NewsItem(
+                        title=title[:200],
+                        summary=summary,
+                        source=source_name,
+                        source_url=entry.get("link", "https://www.cnbc.com/"),
+                        published_at=pub,
+                        category=self._classify(title + " " + summary),
+                        importance="medium",
+                    ))
+            except Exception as e:
+                logger.debug(f"CNBC RSS {url} 失败（可能需要代理）: {e}")
+        return items
+
+    # ── SEC EDGAR 8-K 公告（需美国网络）─────────────────────────────
+
+    def _fetch_sec_edgar_rss(self) -> list[NewsItem]:
+        """SEC EDGAR 重大事件公告（8-K）RSS，仅抓头部大公司（需美国网络或代理）"""
+        # 8-K = 重大事件披露，对市场影响最直接
+        url = (
+            "https://www.sec.gov/cgi-bin/browse-edgar"
+            "?action=getcurrent&type=8-K&dateb=&owner=include&count=20&output=atom"
+        )
+        try:
+            feed = feedparser.parse(url)
+            items = []
+            for entry in feed.entries[:10]:
+                pub = self._parse_rss_date(entry)
+                title = entry.get("title", "")
+                items.append(NewsItem(
+                    title=title[:200],
+                    summary=entry.get("summary", title)[:500],
+                    source="SEC EDGAR",
+                    source_url=entry.get("link", "https://www.sec.gov/"),
+                    published_at=pub,
+                    category="company",
+                    importance="high",
+                ))
+            return items
+        except Exception as e:
+            logger.debug(f"SEC EDGAR RSS 失败（可能需要代理）: {e}")
             return []
 
     # ── NewsAPI（可选增强）────────────────────────────────────────────

@@ -75,7 +75,9 @@ class MarketBriefOrchestrator:
             cache_dir=config.cache_dir,
             newsapi_key=config.newsapi_key or "",
         )
-        self.market_fetcher = MarketDataFetcher()
+        self.market_fetcher = MarketDataFetcher(
+            alpha_vantage_key=config.alpha_vantage_key,
+        )
         self.research_fetcher = ResearchFetcher()
         self.calendar_fetcher = EconomicCalendarFetcher()
         if config.anthropic_api_key:
