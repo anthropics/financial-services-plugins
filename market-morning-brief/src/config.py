@@ -98,6 +98,20 @@ class Config:
         ]
     )
 
+    # ── 飞书 Q&A 机器人（可选）──────────────────────────────────────
+    # 开启后启动 HTTP 服务器接收飞书群消息，群内 @机器人 即可与 Claude 对话
+    # 需要在飞书开放平台创建自建应用并配置事件订阅
+    feishu_bot_enabled: bool = field(
+        default_factory=lambda: os.environ.get("FEISHU_BOT_ENABLED", "false").lower() == "true"
+    )
+    feishu_bot_port: int = field(
+        default_factory=lambda: int(os.environ.get("FEISHU_BOT_PORT", "5000"))
+    )
+    # 飞书事件订阅验证 Token（在飞书开放平台 → 事件订阅 → Verification Token 获取）
+    feishu_verification_token: Optional[str] = field(
+        default_factory=lambda: os.environ.get("FEISHU_VERIFICATION_TOKEN")
+    )
+
     # ── 运行模式 ────────────────────────────────────────────────────
     # "scheduler" = 定时运行（生产）| "manual" = 手动触发（测试）
     run_mode: str = field(

@@ -10,11 +10,12 @@
   21:00  →  美股 开盘前分析（推送飞书）
 
 运行方式：
-  python main.py                    # 定时模式（生产）
-  python main.py --now premarket_asia   # 立即执行亚洲盘前
-  python main.py --now premarket_us     # 立即执行美股盘前
-  python main.py --now postmarket_asia  # 立即执行亚洲复盘
-  python main.py --test             # 测试飞书连接
+  python main.py                           # 定时模式（生产）
+  python main.py --now premarket_asia      # 立即执行亚洲盘前
+  python main.py --now premarket_us        # 立即执行美股盘前
+  python main.py --now postmarket_asia     # 立即执行亚洲复盘
+  python main.py --test                    # 测试飞书连接
+  python main.py --ask "你的问题"          # 向 Claude 提问，结果推送到飞书
 """
 
 import argparse
@@ -37,6 +38,7 @@ from fetchers.economic_calendar import EconomicCalendarFetcher
 from analyzers.claude_analyzer import ClaudeAnalyzer
 from analyzers.rule_analyzer import RuleAnalyzer
 from notifiers.feishu import FeishuNotifier
+from feishu_bot_server import FeishuQABot, run_bot_server
 
 # ── 日志配置 ───────────────────────────────────────────────────────────
 # 确保 cache 目录在写日志前存在（Windows 首次运行时 /app/cache 不存在）
@@ -395,11 +397,12 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
-  python main.py                         # 启动定时调度（生产模式）
-  python main.py --now premarket_asia    # 立即生成亚洲盘前报告
-  python main.py --now postmarket_asia   # 立即生成亚洲收盘复盘
-  python main.py --now premarket_us      # 立即生成美股盘前报告
-  python main.py --test                  # 发送测试消息到飞书
+  python main.py                              # 启动定时调度（生产模式）
+  python main.py --now premarket_asia         # 立即生成亚洲盘前报告
+  python main.py --now postmarket_asia        # 立即生成亚洲收盘复盘
+  python main.py --now premarket_us           # 立即生成美股盘前报告
+  python main.py --test                       # 发送测试消息到飞书
+  python main.py --ask "碧桂园利润预期的影响"  # 向 Claude 提问，结果推送到飞书
         """,
     )
     parser.add_argument(
@@ -416,6 +419,11 @@ def main():
         "--validate",
         action="store_true",
         help="仅验证配置，不运行任务",
+    )
+    parser.add_argument(
+        "--ask",
+        metavar="QUESTION",
+        help="向 Claude 提问金融问题，分析结果推送到飞书（例：--ask '碧桂园利润预期对港股有何影响？'）",
     )
     args = parser.parse_args()
 
@@ -470,8 +478,25 @@ def main():
         task_map[args.now]()
         return
 
+    if args.ask:
+        qa_bot = FeishuQABot(orchestrator, orchestrator.notifier)
+        success = qa_bot.answer_and_push(args.ask, sender_name="命令行")
+        sys.exit(0 if success else 1)
+
     # 默认：定时调度模式
     if config.run_mode == "scheduler":
+        # 若启用了飞书 Q&A 机器人，先在后台启动 HTTP 服务器
+        if config.feishu_bot_enabled:
+            qa_bot = FeishuQABot(orchestrator, orchestrator.notifier)
+            run_bot_server(
+                qa_bot=qa_bot,
+                port=config.feishu_bot_port,
+                verification_token=config.feishu_verification_token,
+            )
+            logger.info(
+                f"飞书 Q&A 机器人已启动（端口 {config.feishu_bot_port}）"
+                "，群内 @机器人 即可提问"
+            )
         run_scheduler(orchestrator)
     else:
         logger.info("RUN_MODE=manual，退出（使用 --now 手动触发任务）")
