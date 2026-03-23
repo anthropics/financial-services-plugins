@@ -439,6 +439,9 @@ class RuleAnalyzer:
                             direction = "涨" if change_pct > 0 else "跌"
                             parts.append(f"{idx_name}{direction}{abs(change_pct):.2f}%")
                             break
+
+        if parts:
+            return f"{market_label}盘前：{'; '.join(parts[:4])}。" + (
                 f"今日有{len(key_events)}条重要事件值得关注。" if key_events else ""
             )
         return f"{market_label}盘前概览：数据采集中，请关注各项指标变化。"
