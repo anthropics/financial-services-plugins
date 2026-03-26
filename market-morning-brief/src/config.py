@@ -43,15 +43,38 @@ class Config:
         ]
     )
 
-    # ── Anthropic API Key（用于 Claude 大模型分析）────────────────────
+    # ── AI 分析引擎（三选一，未配置对应 Key 时自动跳过）──────────────
+    # AI_PROVIDER 可手动指定：claude | openai | gemini
+    # 不填时按优先级自动选择：claude → openai → gemini → 规则引擎
+    ai_provider: str = field(
+        default_factory=lambda: os.environ.get("AI_PROVIDER", "auto")
+    )
+
+    # Claude（Anthropic）
     # 申请地址：https://console.anthropic.com/
-    # 未设置时自动降级为规则引擎（分析质量较低，仅作兜底）
     anthropic_api_key: Optional[str] = field(
         default_factory=lambda: os.environ.get("ANTHROPIC_API_KEY")
     )
-    # Claude 模型版本（默认使用 claude-sonnet-4-6）
     claude_model: str = field(
         default_factory=lambda: os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-6")
+    )
+
+    # OpenAI（ChatGPT）
+    # 申请地址：https://platform.openai.com/api-keys
+    openai_api_key: Optional[str] = field(
+        default_factory=lambda: os.environ.get("OPENAI_API_KEY")
+    )
+    openai_model: str = field(
+        default_factory=lambda: os.environ.get("OPENAI_MODEL", "gpt-4o")
+    )
+
+    # Google Gemini
+    # 申请地址：https://aistudio.google.com/app/apikey
+    gemini_api_key: Optional[str] = field(
+        default_factory=lambda: os.environ.get("GEMINI_API_KEY")
+    )
+    gemini_model: str = field(
+        default_factory=lambda: os.environ.get("GEMINI_MODEL", "gemini-1.5-pro")
     )
 
     # ── 可选数据源 API Key（有免费替代方案）──────────────────────────

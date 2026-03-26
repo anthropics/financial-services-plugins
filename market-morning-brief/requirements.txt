@@ -1,5 +1,7 @@
-# ── Claude 大模型分析（主引擎）────────────────────────────────────────
-anthropic>=0.40.0         # Claude API，未配置时自动降级为规则引擎
+# ── AI 分析引擎（三选一，按需安装）──────────────────────────────────
+anthropic>=0.40.0         # Claude API（Anthropic）
+openai>=1.30.0            # ChatGPT API（OpenAI）
+google-generativeai>=0.8.0  # Gemini API（Google）
 
 # ── 调度器 ────────────────────────────────────────────────────────────
 APScheduler>=3.10.4

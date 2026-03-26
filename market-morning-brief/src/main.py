@@ -35,7 +35,10 @@ from fetchers.news_fetcher import NewsFetcher
 from fetchers.market_data import MarketDataFetcher
 from fetchers.research_fetcher import ResearchFetcher
 from fetchers.economic_calendar import EconomicCalendarFetcher
+from analyzers.base_analyzer import BaseAnalyzer
 from analyzers.claude_analyzer import ClaudeAnalyzer
+from analyzers.openai_analyzer import OpenAIAnalyzer
+from analyzers.gemini_analyzer import GeminiAnalyzer
 from analyzers.rule_analyzer import RuleAnalyzer
 from notifiers.feishu import FeishuNotifier
 from feishu_bot_server import FeishuQABot, run_bot_server
@@ -61,6 +64,62 @@ CST = timezone(timedelta(hours=8))
 
 
 # ══════════════════════════════════════════════════════════════════════
+#  分析引擎工厂
+# ══════════════════════════════════════════════════════════════════════
+
+def _build_analyzer(cfg) -> BaseAnalyzer:
+    """根据配置选择分析引擎，支持手动指定或自动选择"""
+    provider = cfg.ai_provider.lower()
+
+    def try_claude():
+        if cfg.anthropic_api_key:
+            return ClaudeAnalyzer(api_key=cfg.anthropic_api_key, model=cfg.claude_model)
+        return None
+
+    def try_openai():
+        if cfg.openai_api_key:
+            return OpenAIAnalyzer(api_key=cfg.openai_api_key, model=cfg.openai_model)
+        return None
+
+    def try_gemini():
+        if cfg.gemini_api_key:
+            return GeminiAnalyzer(api_key=cfg.gemini_api_key, model=cfg.gemini_model)
+        return None
+
+    if provider == "claude":
+        analyzer = try_claude()
+        if not analyzer:
+            raise ValueError("AI_PROVIDER=claude 但未配置 ANTHROPIC_API_KEY")
+    elif provider == "openai":
+        analyzer = try_openai()
+        if not analyzer:
+            raise ValueError("AI_PROVIDER=openai 但未配置 OPENAI_API_KEY")
+    elif provider == "gemini":
+        analyzer = try_gemini()
+        if not analyzer:
+            raise ValueError("AI_PROVIDER=gemini 但未配置 GEMINI_API_KEY")
+    else:
+        # auto：按优先级自动选择
+        analyzer = try_claude() or try_openai() or try_gemini()
+
+    if analyzer is None:
+        logger.warning("未配置任何 AI API Key，降级使用规则引擎（分析质量较低）")
+        return RuleAnalyzer()
+
+    return analyzer
+
+
+def _analyzer_label(analyzer) -> str:
+    name_map = {
+        "ClaudeAnalyzer": f"Claude（{getattr(analyzer, 'model', '')}）",
+        "OpenAIAnalyzer": f"OpenAI ChatGPT（{getattr(analyzer, 'model', '')}）",
+        "GeminiAnalyzer": f"Google Gemini（{getattr(analyzer, 'model_name', '')}）",
+        "RuleAnalyzer": "规则引擎（无 AI Key，分析质量较低）",
+    }
+    return name_map.get(type(analyzer).__name__, type(analyzer).__name__)
+
+
+# ══════════════════════════════════════════════════════════════════════
 #  核心任务
 # ══════════════════════════════════════════════════════════════════════
 
@@ -80,15 +139,8 @@ class MarketBriefOrchestrator:
         )
         self.research_fetcher = ResearchFetcher()
         self.calendar_fetcher = EconomicCalendarFetcher()
-        if config.anthropic_api_key:
-            self.analyzer = ClaudeAnalyzer(
-                api_key=config.anthropic_api_key,
-                model=config.claude_model,
-            )
-            logger.info(f"分析引擎：Claude 大模型（{config.claude_model}）")
-        else:
-            self.analyzer = RuleAnalyzer()
-            logger.warning("未配置 ANTHROPIC_API_KEY，降级使用规则引擎（分析质量较低）")
+        self.analyzer = _build_analyzer(config)
+        logger.info(f"分析引擎：{_analyzer_label(self.analyzer)}")
         self.notifier = FeishuNotifier(
             webhook_urls=config.feishu_webhooks,
             secret=config.feishu_secret,
@@ -438,10 +490,8 @@ def main():
     try:
         config.validate()
         logger.info("配置校验通过")
-        if config.anthropic_api_key:
-            logger.info(f"  分析引擎: Claude 大模型（{config.claude_model}）")
-        else:
-            logger.warning("  分析引擎: 规则引擎（未配置 ANTHROPIC_API_KEY，分析质量较低）")
+        analyzer_preview = _build_analyzer(config)
+        logger.info(f"  分析引擎: {_analyzer_label(analyzer_preview)}")
         if config.feishu_app_mode:
             logger.info(f"  飞书模式: 自建应用（app_id={config.feishu_app_id[:8]}...，推送 {len(config.feishu_chat_ids)} 个群）")
         else:

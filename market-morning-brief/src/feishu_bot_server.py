@@ -47,7 +47,7 @@ def _dedup_event(event_id: str) -> bool:
 
 
 # ══════════════════════════════════════════════════════════════════════
-#  Q&A 核心：调用 Claude 回答金融问题
+#  Q&A 核心：调用 AI 引擎回答金融问题
 # ══════════════════════════════════════════════════════════════════════
 
 class FeishuQABot:
@@ -55,25 +55,9 @@ class FeishuQABot:
     飞书金融问答机器人
     - 接收用户问题
     - 获取最新新闻作为上下文
-    - 调用 Claude 生成分析回答
-    - 通过 Webhook 推送到飞书
+    - 调用已配置的 AI 引擎（Claude/OpenAI/Gemini）生成回答
+    - 通过飞书 API 推送到群
     """
-
-    SYSTEM_PROMPT = """你是一位专业的金融分析师，专注于A股、港股和美股市场分析。
-
-分析框架：基于第一性原理，将市场价格拆解为 P = f(E × r / L × ρ)：
-- E（盈利预期）：企业未来盈利能力
-- r（利率）：无风险利率 → 折现因子
-- L（流动性）：货币供应、信贷、资金流向
-- ρ（风险情绪）：VIX、北向资金、市场情绪
-
-回答要求：
-1. 直接回答问题，结论在前
-2. 说明影响的变量（E/r/L/ρ）及传导链条
-3. 指出受影响的行业/板块
-4. 给出具体操作建议（买入/观望/回避）
-5. 回答控制在 300 字以内，简明精准
-6. 最后注明：本分析仅供参考，不构成投资建议"""
 
     def __init__(self, orchestrator, notifier):
         self.orchestrator = orchestrator
@@ -101,7 +85,7 @@ class FeishuQABot:
             return False
 
     def _generate_answer(self, question: str) -> str:
-        """调用 Claude（或规则引擎）生成回答"""
+        """调用已配置的 AI 引擎（Claude/OpenAI/Gemini）生成回答，降级到规则引擎"""
         # 获取最近新闻作为上下文（最多 20 条，4小时内）
         context_parts = []
         try:
@@ -110,45 +94,22 @@ class FeishuQABot:
                 context_parts.append("【最新市场新闻（过去4小时）】")
                 for item in news_items[:20]:
                     item_dict = item.to_dict() if hasattr(item, "to_dict") else item
-                    title = item_dict.get("title", "")
-                    source = item_dict.get("source", "")
-                    context_parts.append(f"- [{source}] {title}")
+                    context_parts.append(f"- [{item_dict.get('source', '')}] {item_dict.get('title', '')}")
         except Exception as e:
             logger.warning(f"[Q&A] 获取新闻失败: {e}")
 
         context = "\n".join(context_parts) if context_parts else "（暂无最新新闻数据）"
 
-        # 尝试 Claude API
-        if hasattr(self.orchestrator.analyzer, '_call_claude'):
+        # 调用已配置的 AI 引擎
+        analyzer = self.orchestrator.analyzer
+        if hasattr(analyzer, "answer_question"):
             try:
-                return self._call_claude(question, context)
+                return analyzer.answer_question(question, context)
             except Exception as e:
-                logger.warning(f"[Q&A] Claude 调用失败: {e}，降级到规则引擎")
+                logger.warning(f"[Q&A] AI 调用失败: {e}，降级到规则引擎")
 
         # 降级：简单关键词分析
         return self._rule_based_answer(question, context_parts)
-
-    def _call_claude(self, question: str, context: str) -> str:
-        """直接调用 Claude API"""
-        analyzer = self.orchestrator.analyzer
-        import anthropic
-        client = anthropic.Anthropic(api_key=analyzer.api_key)
-        prompt = f"""以下是当前市场最新动态：
-
-{context}
-
----
-用户问题：{question}
-
-请基于以上信息和你的金融专业知识回答。"""
-
-        response = client.messages.create(
-            model=analyzer.model,
-            max_tokens=1024,
-            system=self.SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return response.content[0].text.strip()
 
     def _rule_based_answer(self, question: str, news_titles: list[str]) -> str:
         """无 Claude 时的简单关键词回答"""
