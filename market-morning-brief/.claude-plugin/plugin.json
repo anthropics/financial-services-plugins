@@ -1,0 +1,19 @@
+{
+  "name": "market-morning-brief",
+  "version": "1.0.0",
+  "description": "三地股市智能早报/晚报系统：开盘前30分钟扫描重大事件、政策、研报，生成操作建议并推送飞书；收盘后复盘三地市场，优化次日策略。数据全程可溯源，基于第一性原则分析。",
+  "author": {
+    "name": "Community"
+  },
+  "components": {
+    "commands": "commands/",
+    "skills": "skills/",
+    "hooks": "hooks/"
+  },
+  "markets": ["A-share", "HK", "US"],
+  "schedule": {
+    "asia_premarket": "09:00 CST",
+    "asia_postmarket": "15:30 CST",
+    "us_premarket": "21:30 CST"
+  }
+}

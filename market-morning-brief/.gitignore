@@ -1,0 +1,24 @@
+# 敏感配置（绝不提交！）
+.env
+
+# 缓存数据
+cache/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp

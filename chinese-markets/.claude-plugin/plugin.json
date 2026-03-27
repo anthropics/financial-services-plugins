@@ -1,0 +1,8 @@
+{
+  "name": "chinese-markets",
+  "version": "1.0.0",
+  "description": "A股和港股分析工具：免费数据源驱动的中国资本市场分析插件，支持A股（上交所/深交所）、港股（港交所）行情查询、DCF估值、财报分析、行业对比等功能",
+  "author": {
+    "name": "Community"
+  }
+}

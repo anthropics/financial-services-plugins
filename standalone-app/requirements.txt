@@ -1,0 +1,7 @@
+flask==3.1.0
+akshare>=1.14.0
+yfinance>=0.2.40
+baostock>=0.8.8
+pandas>=2.0.0
+requests>=2.31.0
+waitress>=3.0.0

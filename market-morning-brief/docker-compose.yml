@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  market-brief:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: market-brief
+    restart: unless-stopped       # 崩溃自动重启，手动 stop 不重启
+    env_file:
+      - .env                      # 读取 .env 配置文件
+    volumes:
+      - ./cache:/app/cache        # 持久化策略记忆和日志
+    environment:
+      - TZ=Asia/Shanghai
+      - CACHE_DIR=/app/cache
+    # 资源限制（可按需调整）
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+# 可选：添加 Prometheus 监控（高级用户）
+# volumes:
+#   cache:

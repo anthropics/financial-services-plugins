@@ -1,0 +1,43 @@
+{
+  "mcpServers": {
+    "akshare-proxy": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "akshare_mcp_server"],
+      "description": "AkShare免费金融数据服务 - 覆盖A股、港股、期货、ETF等",
+      "env": {},
+      "free": true,
+      "markets": ["A股", "港股", "期货", "ETF", "债券"]
+    },
+    "yfinance-proxy": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "yfinance_mcp_server"],
+      "description": "Yahoo Finance免费数据服务 - 覆盖港股、美股、ETF",
+      "env": {},
+      "free": true,
+      "markets": ["港股", "美股", "ETF"]
+    },
+    "baostock-proxy": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "baostock_mcp_server"],
+      "description": "BaoStock免费A股历史数据 - 证券宝，完全免费的A股历史行情数据",
+      "env": {},
+      "free": true,
+      "markets": ["A股"]
+    },
+    "sec-edgar": {
+      "type": "http",
+      "url": "https://efts.sec.gov/LATEST/search-index?q=",
+      "description": "SEC EDGAR免费数据 - 美国上市公司财务报告",
+      "free": true
+    },
+    "fred-data": {
+      "type": "http",
+      "url": "https://api.stlouisfed.org/fred",
+      "description": "美联储FRED免费宏观经济数据",
+      "free": true
+    }
+  }
+}
