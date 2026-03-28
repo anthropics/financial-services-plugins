@@ -148,11 +148,17 @@ As your team builds and shares plugins, Claude becomes a cross-functional expert
 
 ## Contributing
 
-Plugins are just markdown files. Fork the repo, make your changes, and submit a PR. For new skills or plugins, include:
+### Submitting Plugins
 
-- A `SKILL.md` with clear trigger conditions and workflow steps
-- A corresponding command in `commands/` if user-invocable
-- Updated plugin manifest if adding new capabilities
+**General plugins** should be submitted to the main plugin directory via the [official submission process](https://claude.com/docs/plugins/submit#submitting-your-plugin).
+
+If your plugin is **specific to financial services** and you'd like it listed in this marketplace, host your plugin in your own repository and open a PR that adds an entry to [`.claude-plugin/marketplace.json`](./.claude-plugin/marketplace.json) pointing to it. **Do not** submit PRs containing your plugin's markdown/source files. Note that PRs to this repository are not actively monitored.
+
+**MCP requirement**: Any MCP servers used in your plugin must be listed in the [Claude Connectors Directory](https://claude.com/connectors).
+
+### Other Changes
+
+All other edits to this repository (skills, commands, core plugins) are reserved for repository maintainers.
 
 ## License
 
