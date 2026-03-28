@@ -1,0 +1,13 @@
+{
+  "name": "urai-investment-system",
+  "version": "0.1.0",
+  "description": "URai SOVEREIGN PRIME — AI-powered investment system with HGEN Council (10 legendary investors debate every trade), Kelly Criterion position sizing, geopolitical war premium scoring, and multi-agent stock analysis. Built over 263+ iterations for retail investors seeking institutional-grade decision frameworks.",
+  "author": {
+    "name": "Uri Eliakim",
+    "email": "uelyakim@gmail.com",
+    "url": "https://gumroad.com/l/ubmic"
+  },
+  "homepage": "https://gumroad.com/l/ubmic",
+  "categories": ["investment-analysis", "portfolio-management", "risk-assessment"],
+  "license": "Apache-2.0"
+}
