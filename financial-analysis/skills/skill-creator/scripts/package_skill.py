@@ -13,6 +13,10 @@ Example:
 import sys
 import zipfile
 from pathlib import Path
+
+# Ensure sibling modules (quick_validate) are importable regardless of cwd
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 from quick_validate import validate_skill
 
 
