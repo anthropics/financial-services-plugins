@@ -28,6 +28,7 @@ const KEYS = {
   aws_region: { pattern: /^[a-z]{2}-[a-z]+-\d+$/, hint: "e.g. us-east-1" },
   gateway_url: { pattern: /^https:\/\//, hint: "HTTPS base URL" },
   gateway_token: { pattern: /./, hint: "gateway API key", secret: true },
+  gateway_auth_header: { pattern: /^(x-api-key|authorization)$/, hint: "auth header scheme (default: x-api-key)" },
   bootstrap_url: { pattern: /^https:\/\//, hint: "HTTPS endpoint returning per-user config" },
   auto_connect: { pattern: /^[01]$/, hint: "0 shows form, 1 (or omit) auto-connects" },
   entra_sso: { pattern: /^[01]$/, hint: "1 enables Entra SSO (required for aws_role_arn)" },

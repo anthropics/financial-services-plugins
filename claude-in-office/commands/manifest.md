@@ -16,7 +16,7 @@ Prompt only for the keys their cloud path needs. Don't ask for all eight.
 |---|---|
 | Vertex | `gcp_project_id` `gcp_region` `google_client_id` `google_client_secret` |
 | Bedrock | `aws_role_arn` `aws_region` |
-| Gateway | `gateway_url` `gateway_token` |
+| Gateway | `gateway_url` `gateway_token` `gateway_auth_header` |
 
 ## Entra SSO
 
