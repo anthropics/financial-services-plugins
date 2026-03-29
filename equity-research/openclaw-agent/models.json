@@ -1,0 +1,276 @@
+{
+  "providers": {
+    "dashscope": {
+      "baseUrl": "https://coding.dashscope.aliyuncs.com/v1",
+      "apiKey": "inherit",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "qwen3-max-2026-01-23",
+          "name": "Qwen3-Max (DashScope)",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 128000,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        }
+      ]
+    },
+    "kimi-coding": {
+      "baseUrl": "https://api.kimi.com/coding/",
+      "api": "anthropic-messages",
+      "models": [
+        {
+          "id": "k2p5",
+          "name": "Kimi for Coding",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 262144,
+          "maxTokens": 32768,
+          "compat": {
+            "requiresOpenAiAnthropicToolPayload": true
+          }
+        }
+      ],
+      "apiKey": "${KIMI_API_KEY}"
+    },
+    "volcengine": {
+      "baseUrl": "https://ark.cn-beijing.volces.com/api/v3",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "doubao-seed-code-preview-251028",
+          "name": "doubao-seed-code-preview-251028",
+          "reasoning": false,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0.0001,
+            "output": 0.0002,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 256000,
+          "maxTokens": 4096
+        },
+        {
+          "id": "doubao-seed-1-8-251228",
+          "name": "Doubao Seed 1.8",
+          "reasoning": false,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0.0001,
+            "output": 0.0002,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 256000,
+          "maxTokens": 4096
+        },
+        {
+          "id": "kimi-k2-5-260127",
+          "name": "Kimi K2.5",
+          "reasoning": false,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0.0001,
+            "output": 0.0002,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 256000,
+          "maxTokens": 4096
+        },
+        {
+          "id": "glm-4-7-251222",
+          "name": "GLM 4.7",
+          "reasoning": false,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0.0001,
+            "output": 0.0002,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 200000,
+          "maxTokens": 4096
+        },
+        {
+          "id": "deepseek-v3-2-251201",
+          "name": "DeepSeek V3.2",
+          "reasoning": false,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0.0001,
+            "output": 0.0002,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 128000,
+          "maxTokens": 4096
+        }
+      ],
+      "apiKey": "${VOLCENGINE_API_KEY}"
+    },
+    "volcengine-plan": {
+      "baseUrl": "https://ark.cn-beijing.volces.com/api/coding/v3",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "ark-code-latest",
+          "name": "Ark Coding Plan",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0.0001,
+            "output": 0.0002,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 256000,
+          "maxTokens": 4096
+        },
+        {
+          "id": "doubao-seed-code",
+          "name": "Doubao Seed Code",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0.0001,
+            "output": 0.0002,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 256000,
+          "maxTokens": 4096
+        },
+        {
+          "id": "glm-4.7",
+          "name": "GLM 4.7 Coding",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0.0001,
+            "output": 0.0002,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 200000,
+          "maxTokens": 4096
+        },
+        {
+          "id": "kimi-k2-thinking",
+          "name": "Kimi K2 Thinking",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0.0001,
+            "output": 0.0002,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 256000,
+          "maxTokens": 4096
+        },
+        {
+          "id": "kimi-k2.5",
+          "name": "Kimi K2.5 Coding",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0.0001,
+            "output": 0.0002,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 256000,
+          "maxTokens": 4096
+        },
+        {
+          "id": "doubao-seed-code-preview-251028",
+          "name": "Doubao Seed Code Preview",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0.0001,
+            "output": 0.0002,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 256000,
+          "maxTokens": 4096
+        }
+      ],
+      "apiKey": "${VOLCENGINE_API_KEY}"
+    },
+    "claude-proxy": {
+      "baseUrl": "${CLAUDE_PROXY_BASE_URL}",
+      "api": "anthropic-messages",
+      "apiKey": "${CLAUDE_PROXY_API_KEY}",
+      "models": [
+        {
+          "id": "claude-sonnet-4-20250514",
+          "name": "Claude Sonnet 4 (Proxy)",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0.003,
+            "output": 0.015,
+            "cacheRead": 0.0003,
+            "cacheWrite": 0.00375
+          },
+          "contextWindow": 200000,
+          "maxTokens": 16384,
+          "api": "anthropic-messages"
+        }
+      ]
+    }
+  }
+}
