@@ -38,6 +38,11 @@
       "name": "sp-global",
       "source": "./partner-built/spglobal",
       "description": "S&P Global - Financial data and analytics skills including company tearsheets, earnings previews, and transaction summaries"
+    },
+    {
+      "name": "claude-in-office",
+      "source": "./claude-in-office",
+      "description": "Provision direct cloud access (Vertex AI, Bedrock, or LLM gateway) for the Claude Office add-in. Generates the customized manifest, walks through Azure admin consent, and writes per-user config via Graph extension attributes."
     }
   ]
 }

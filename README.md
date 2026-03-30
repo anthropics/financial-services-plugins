@@ -49,6 +49,19 @@ These plugins are built and maintained by our data partners, bringing their fina
 | **[LSEG](./partner-built/lseg)** | [LSEG](https://www.lseg.com/) | Price bonds, analyze yield curves, evaluate FX carry trades, value options, and build macro dashboards using LSEG financial data and analytics. 8 commands covering fixed income, FX, equities, and macro. |
 | **[S&P Global](./partner-built/spglobal)** | [S&P Global](https://www.spglobal.com/) | Generate company tearsheets, earnings previews, and funding digests powered by S&P Capital IQ data. Supports multiple audience types (equity research, IB/M&A, corp dev, sales). |
 
+### Office Add-in Deployment
+
+For Microsoft 365 admins deploying the [Claude Office add-in](https://pivot.claude.ai) with direct cloud access to your own Vertex AI, Bedrock, or LLM gateway.
+
+| Plugin | How it helps |
+|--------|-------------|
+| **[claude-in-office](./claude-in-office)** | Interactive setup wizard that provisions cloud resources, generates the customized add-in manifest, walks through Azure admin consent, and writes per-user config via Microsoft Graph extension attributes. |
+
+```bash
+claude plugin install claude-in-office@financial-services-plugins
+/claude-in-office:setup
+```
+
 ## Getting Started
 
 ### Cowork
