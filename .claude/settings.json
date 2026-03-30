@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "financial-services-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/financial-services-plugins"
+      }
+    }
+  },
+  "enabledPlugins": [
+    "claude-in-office@financial-services-plugins"
+  ]
+}
