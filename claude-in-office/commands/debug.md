@@ -17,6 +17,7 @@ Ask the admin to describe the symptom. Route by answer:
 | Add-in shows "Connection failed" | [Read the error paste](#read-the-error-paste) |
 | Add-in doesn't appear in Excel/PowerPoint at all | [Add-in not visible](#add-in-not-visible) |
 | Sign-in popup fails or loops | [Admin consent](#admin-consent) |
+| Need to see the browser console | [Opening browser devtools](#opening-browser-devtools-on-the-add-in) |
 
 If they have an error paste from the add-in (the **Copy error details** button
 on the connect-failed screen), always start there. It carries everything.
@@ -135,3 +136,70 @@ hasn't granted admin consent to the Claude app. Run
 [`:consent`](consent.md) to generate the consent URL for a Global Admin to
 approve. The symptom in error pastes: `user_canceled` in the raw error (the
 broker maps any unclassifiable close to that).
+
+---
+
+## Opening browser devtools on the add-in
+
+When you need the WebView's console — JS errors, network tab, the add-in's
+debug logs — you have to attach the host OS's browser devtools. The add-in runs
+in an embedded WebView with no address bar and no built-in F12, so each OS
+has its own recipe.
+
+### macOS (Safari Web Inspector)
+
+Three gates. **Gate 3 is the one everyone misses.**
+
+1. **Office developer extras** — quit the app first, then:
+   ```bash
+   defaults write com.microsoft.Excel OfficeWebAddinDeveloperExtras -bool true
+   defaults write com.microsoft.Powerpoint OfficeWebAddinDeveloperExtras -bool true
+   defaults write com.microsoft.Word OfficeWebAddinDeveloperExtras -bool true
+   ```
+   Makes right-click → **Inspect Element** appear inside the task pane.
+
+2. **Safari Develop menu** — Safari → Settings → Advanced → check *Show
+   features for web developers*.
+
+3. **macOS Developer Tools allowlist** (Sonoma and later) — System Settings
+   → Privacy & Security → Developer Tools → toggle **Terminal** on. Without
+   this, Safari's Develop menu shows *"No Inspectable Applications"* even
+   with gates 1 and 2 open.
+
+With the task pane open, either right-click inside it → **Inspect Element**,
+or go to Safari → Develop → *[your machine name]* → find the add-in host
+(`pivot.claude.ai` in prod, your configured domain otherwise).
+
+**Gotchas:**
+- **Office updates silently reset gate 1.** If inspection worked last week
+  and doesn't now, re-run the `defaults write`.
+- *"No Inspectable Applications"* = gate 3 missing, or the Office app wasn't
+  fully quit before `defaults write`. `pkill -f "Microsoft Excel"` then
+  relaunch.
+- The task pane has to be **open** (not just the app) for it to appear under
+  Safari's Develop menu.
+
+### Windows (Edge DevTools)
+
+Depends on which WebView engine Office is using. Current M365 on Win10/11
+with the WebView2 runtime gets Chromium; older perpetual Office or machines
+without the runtime may still be on IE11/Trident.
+
+**WebView2 (Chromium — the common case):**
+
+Right-click inside the task pane → **Inspect**. That's it, no gates. If
+right-click doesn't show Inspect, install **Microsoft Edge DevTools
+Preview** from the Microsoft Store — it lists all attachable WebView2
+targets including Office add-ins. Launch it, find the add-in's URL in the
+target list, click to attach.
+
+**IE11/Trident (legacy Office 2019/2021 perpetual):**
+
+Run the IEChooser from an admin PowerShell:
+```powershell
+& "C:\Windows\SysWOW64\F12\IEChooser.exe"
+```
+Pick the add-in's page from the list. If the list is empty, the task pane
+isn't open yet — open it first, then refresh IEChooser.
+
+Microsoft's walkthrough: https://learn.microsoft.com/en-us/office/dev/add-ins/testing/debug-add-ins-using-devtools-edge-chromium
