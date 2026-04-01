@@ -230,9 +230,16 @@ npx -y office-addin-manifest validate manifest.xml
 
 ## Step 5 — Per-user config
 
-Skip unless Step 3 routed a key here. Otherwise read
-`${CLAUDE_PLUGIN_ROOT}/commands/update-user-attrs.md` with the per-user keys
-from Step 3.
+Skip unless Step 3 routed something here. Otherwise pick a mechanism by what
+you're carrying:
+
+| Carrying | Use | Read |
+|---|---|---|
+| A string or two — token, region | Extension attrs | `${CLAUDE_PLUGIN_ROOT}/commands/update-user-attrs.md` |
+| `mcp_servers`, `skills`, anything structured | Bootstrap endpoint | `${CLAUDE_PLUGIN_ROOT}/commands/bootstrap.md` |
+
+Attrs are an `az rest PATCH` per user — less work, but flat strings ≤256 chars
+only. Bootstrap is an HTTPS service you build — more work, no shape limits.
 
 ## Step 6 — Verify a model is reachable
 

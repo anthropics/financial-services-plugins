@@ -37,49 +37,13 @@ involve Microsoft.
 ## Bootstrap endpoint
 
 `bootstrap_url` points to an HTTPS endpoint you host. At startup the add-in
-fetches per-user config from it; the response overrides manifest values for
-that user.
+fetches per-user JSON from it — provider keys, `mcp_servers`, `skills` — and
+the response overrides manifest values for that user. The URL itself is
+[interpolated](bootstrap.md#template-interpolation) against manifest + attrs
+before the fetch, so one endpoint can branch on a query param.
 
-**Request**
-
-```
-GET <bootstrap_url>
-Authorization: Bearer <entra_id_token>    # present only when entra_sso=1
-```
-
-If `entra_sso=1` is set, validate the JWT: `aud` is
-`c2995f31-11e7-4882-b7a7-ef9def0a0266`, `iss` is your tenant's
-`https://login.microsoftonline.com/<TENANT_ID>/v2.0`, and `oid` is the user's
-stable object ID for your allowlist. Without `entra_sso`, the request has no
-Authorization header — for endpoints behind network isolation, mTLS, or another
-auth layer the add-in doesn't see.
-
-**Response** — `200 OK`, `application/json`
-
-The endpoint must set `Access-Control-Allow-Origin` to the add-in's origin
-(`https://pivot.claude.ai` for production) — the call is browser-side fetch,
-so without CORS the response is blocked before the add-in sees it.
-
-A flat object with any subset of the config keys. All fields optional — return
-only what this user needs.
-
-```json
-{
-  "gateway_url": "https://llm-gateway.yourcompany.internal/v1",
-  "gateway_token": "sk-user-scoped-…",
-  "bootstrap_expires_at": 1775000000,
-  "aws_role_arn": "arn:aws:iam::123456789012:role/ClaudeBedrockAccess-TeamA"
-}
-```
-
-`bootstrap_expires_at` (epoch seconds or milliseconds — auto-detected)
-enables proactive config refresh: the add-in re-calls this endpoint before
-expiry. Omit for non-expiring snapshots.
-
-The add-in ignores unrecognized keys, so the envelope is forward-compatible.
-Today it carries provider config; future versions may read `skills`,
-`mcp_servers`, or other per-user provisioning from the same response without
-requiring endpoint changes on your side.
+See [bootstrap](bootstrap.md) for the request/response contract, JWT
+validation, and handler scaffolding.
 
 ## Auto-connect
 

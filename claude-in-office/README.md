@@ -20,3 +20,4 @@ Then inside the session: `/claude-in-office:setup`
 | `/claude-in-office:manifest` | Generate the customized add-in manifest XML |
 | `/claude-in-office:consent` | Azure admin consent URL for the add-in's app registration |
 | `/claude-in-office:update-user-attrs` | Write per-user config via Microsoft Graph extension attributes |
+| `/claude-in-office:bootstrap` | Build the bootstrap endpoint — per-user MCP servers, skills, dynamic config |
