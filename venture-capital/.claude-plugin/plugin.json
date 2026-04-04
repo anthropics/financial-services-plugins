@@ -1,0 +1,8 @@
+{
+  "name": "venture-capital",
+  "version": "0.1.0",
+  "description": "Venture Capital deal sourcing and portfolio management tools: Cap table analysis, term sheet review, and deal flow management",
+  "author": {
+    "name": "Anthropic FSI"
+  }
+}
