@@ -1,0 +1,8 @@
+{
+  "name": "private-credit",
+  "version": "1.0.0",
+  "description": "Domain-specific skills and commands for private credit analysts and portfolio managers at direct lending funds. Covers covenant compliance, EBITDA adjustments, IC memo generation, quarterly monitoring, deal screening, credit modeling, amendment analysis, and scenario testing.",
+  "author": {
+    "name": "Accretive AI"
+  }
+}
