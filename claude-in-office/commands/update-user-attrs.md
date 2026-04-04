@@ -24,6 +24,7 @@ over manifest params, so whatever's here wins. All values are 256 chars max.
 | `gcp_region` | Data-residency override |
 | `google_client_id` `google_client_secret` | Different OAuth client per team (uncommon) |
 | `aws_role_arn` `aws_region` | Different Bedrock roles by team |
+| `otlp_endpoint` `otlp_headers` | Route telemetry to a team-specific OTEL collector |
 
 ## One user
 

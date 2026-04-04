@@ -60,6 +60,20 @@ value is JSON inside a shell arg — single-quote it:
 mcp_servers='[{"url":"{{gateway_url}}/deepwiki/mcp","label":"DeepWiki","headers":{"Authorization":"Bearer {{gateway_token}}"}}]'
 ```
 
+## Telemetry
+
+`otlp_endpoint` routes the add-in's OpenTelemetry traces to a collector you
+operate. Set it to the collector's base HTTPS URL — the add-in appends
+`/v1/traces` and posts OTLP/HTTP. gRPC isn't supported (the add-in runs in a
+browser WebView). Leave it unset and no custom collector is configured.
+
+`otlp_headers` supplies authentication headers for that collector, in the same
+`key1=value1,key2=value2` format as the standard
+`OTEL_EXPORTER_OTLP_HEADERS` variable. URL-encode the value in the manifest.
+
+Setting these here applies one collector org-wide; per-user routing belongs in
+[bootstrap](bootstrap.md#telemetry) or extension attrs.
+
 ## Auto-connect
 
 Default: when all fields for a provider are set, users skip the connection form

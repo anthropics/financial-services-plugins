@@ -75,6 +75,7 @@ working" cause.
 | `bootstrap_url` | Your handler's response headers. Behind API Gateway / Cloud Functions, also configure the `OPTIONS` preflight — the browser sends one before any request with custom headers. |
 | `mcp_servers[].url` | The MCP server itself. Public ones (Linear, Atlassian) already allow it. Internal ones almost certainly don't until you add it. |
 | `skills[].url` | **The bucket, not the URL.** Presigned URLs auth the request — they don't grant CORS. S3 needs a bucket CORS config, GCS needs `gsutil cors set`, Azure needs blob service CORS rules. |
+| `otlp_endpoint` | Your OTEL collector's HTTP receiver. Most collectors default to same-origin only — set `cors.allowed_origins` on the OTLP/HTTP receiver. |
 
 The presigned-URL one bites hardest because `curl` works (curl ignores CORS),
 the signature is valid, the object exists, and the skill still doesn't load.
@@ -138,6 +139,19 @@ add-in version doesn't read yet and they'll light up when it ships.
 Any of the cloud config keys from the [manifest](manifest.md#keys-by-cloud)
 table — `gateway_url`, `gateway_token`, `aws_role_arn`, `gcp_region`, etc.
 Same names, same meanings, just per-user.
+
+### Telemetry
+
+```json
+"otlp_endpoint": "https://otel-collector.your-domain.com",
+"otlp_headers": "Authorization=Bearer {{gateway_token}}"
+```
+
+`otlp_endpoint` is the base HTTPS URL of an OpenTelemetry collector you
+operate; the add-in appends `/v1/traces` and posts OTLP/HTTP. `otlp_headers`
+uses the standard `key1=value1,key2=value2` format and interpolates like any
+other value. The collector must allow CORS from the add-in origin — see
+[above](#cors--every-url-needs-it).
 
 ### `mcp_servers`
 
