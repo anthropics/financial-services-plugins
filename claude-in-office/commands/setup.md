@@ -41,6 +41,7 @@ an LLM gateway (LiteLLM, Portkey, Kong, etc.)?**
 | `gateway` | Add-in → your gateway → (whatever) | None | `gateway_url` |
 | `vertex` | Add-in → Google Vertex AI, directly | Google OAuth client | `gcp_project_id`, `gcp_region`, `google_client_id`, `google_client_secret` |
 | `bedrock` | Add-in → AWS Bedrock, directly | IAM OIDC provider + role | `aws_role_arn`, `aws_region` |
+| `foundry` | Add-in → Azure AI Foundry, directly | Foundry resource + API key | `azure_resource_name`, `azure_api_key` |
 
 Bedrock and per-user config (bootstrap endpoint or extension attrs) need
 `entra_sso=1` — the add-in acquires the user's Entra ID token to authenticate
@@ -182,6 +183,29 @@ need `authorization`.
 
 Continue to [Step 3](#step-3--decide-whats-org-wide-vs-per-user). Gateway auth
 is token-based, not Entra, so admin consent isn't needed unless you also opt
+into per-user config (in which case come back to Step 2 after deciding in Step 3).
+
+---
+
+## Azure AI Foundry
+
+### 1a. Prerequisites
+
+Confirm with the admin:
+- An Azure AI Foundry resource with at least one Claude model deployed
+- The resource name (the subdomain of the endpoint URL — e.g. `contoso-foundry`
+  from `https://contoso-foundry.services.ai.azure.com`)
+
+### 1b. Get the API key
+
+Open the resource in the Azure Portal, then **Keys and Endpoint** → copy
+**KEY 1**. The add-in auto-detects which Claude models are deployed in the
+resource, so no model config is needed here.
+
+Capture: `azure_resource_name`, `azure_api_key`.
+
+Continue to [Step 3](#step-3--decide-whats-org-wide-vs-per-user). Foundry auth
+is key-based, not Entra, so admin consent isn't needed unless you also opt
 into per-user config (in which case come back to Step 2 after deciding in Step 3).
 
 ---

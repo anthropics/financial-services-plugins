@@ -26,6 +26,14 @@ const KEYS = {
     hint: "e.g. arn:aws:iam::123456789012:role/ClaudeBedrockAccess",
   },
   aws_region: { pattern: /^[a-z]{2}-[a-z]+-\d+$/, hint: "e.g. us-east-1" },
+  azure_resource_name: {
+    pattern: /^[a-z0-9][a-z0-9-]{1,62}$/,
+    hint: "Azure AI Foundry resource name — the subdomain of your endpoint URL, e.g. 'contoso-foundry' from https://contoso-foundry.services.ai.azure.com",
+  },
+  azure_api_key: {
+    pattern: /^[A-Za-z0-9]{20,}$/,
+    hint: "From Azure Portal → your Foundry resource → Keys and Endpoint → KEY 1",
+  },
   gateway_url: { pattern: /^https:\/\//, hint: "HTTPS base URL" },
   gateway_token: { pattern: /./, hint: "gateway API key", secret: true },
   gateway_auth_header: { pattern: /^(x-api-key|authorization)$/, hint: "auth header scheme (default: x-api-key)" },
