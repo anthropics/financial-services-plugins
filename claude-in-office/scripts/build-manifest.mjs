@@ -29,6 +29,7 @@ const KEYS = {
   gateway_url: { pattern: /^https:\/\//, hint: "HTTPS base URL" },
   gateway_token: { pattern: /./, hint: "gateway API key", secret: true },
   gateway_auth_header: { pattern: /^(x-api-key|authorization)$/, hint: "auth header scheme (default: x-api-key)" },
+  gateway_api_format: { pattern: /^(anthropic|bedrock|vertex)$/, hint: "anthropic | bedrock | vertex" },
   mcp_servers: { pattern: /^\[.*\]$/, hint: "JSON array of {url, label, headers?, discover?}" },
   bootstrap_url: { pattern: /^https:\/\//, hint: "HTTPS endpoint returning per-user config" },
   auto_connect: { pattern: /^[01]$/, hint: "0 shows form, 1 (or omit) auto-connects" },

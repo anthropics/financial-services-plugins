@@ -140,6 +140,10 @@ Any of the cloud config keys from the [manifest](manifest.md#keys-by-cloud)
 table — `gateway_url`, `gateway_token`, `aws_role_arn`, `gcp_region`, etc.
 Same names, same meanings, just per-user.
 
+If you return `gateway_api_format: "vertex"`, also return `gcp_project_id` and
+`gcp_region` (or set them at a lower layer) — they're path segments in the
+Vertex `:rawPredict` URL the add-in constructs. `"bedrock"` needs no extras.
+
 ### Telemetry
 
 ```json

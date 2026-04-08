@@ -38,7 +38,7 @@ an LLM gateway (LiteLLM, Portkey, Kong, etc.)?**
 
 | Path | What it means | Provisioning | Manifest keys |
 |---|---|---|---|
-| `gateway` | Add-in → your gateway → (whatever) | None | `gateway_url` |
+| `gateway` | Add-in → your gateway → (whatever) | None | `gateway_url` (+ `gateway_api_format` if not `/v1/messages`) |
 | `vertex` | Add-in → Google Vertex AI, directly | Google OAuth client | `gcp_project_id`, `gcp_region`, `google_client_id`, `google_client_secret` |
 | `bedrock` | Add-in → AWS Bedrock, directly | IAM OIDC provider + role | `aws_role_arn`, `aws_region` |
 
@@ -171,6 +171,17 @@ instead of the manifest.
 
 Capture: `gateway_url`, `gateway_token`.
 
+**API format.** Ask: does the gateway expose the Anthropic `/v1/messages` API,
+or is it a pass-through to Bedrock (`/model/{id}/invoke…`) or Vertex
+(`…:rawPredict`)? Almost always Anthropic — LiteLLM/Portkey/Kong default to
+it, and a unified `/v1/messages` route is the point of running a gateway. Only
+set `gateway_api_format` to `bedrock` or `vertex` if the gateway is a thin
+proxy that preserves the upstream wire format. If `vertex`, also capture
+`gcp_project_id` (their GCP project) and `gcp_region` (typically `us-east5`) —
+they're path segments in the URL the add-in constructs. Point `gateway_url` at
+the pass-through path, e.g. `https://litellm.acme.com/bedrock` or
+`…/vertex_ai/v1`.
+
 **Auth header scheme.** The add-in sends the token as `x-api-key: <token>` by
 default — this is what LiteLLM, Portkey, and Kong accept out of the box. If
 your gateway expects `Authorization: Bearer <token>` instead (common for
@@ -252,13 +263,31 @@ gateway doesn't route that model name — try the other, or ask them to check
 their gateway config. 429 means auth works but no quota on that model — try
 the other. 401/403 means the token is wrong, which is a Step 1 problem.
 
+Pick the curl that matches `gateway_api_format`. (Windows: swap `/dev/null`
+for `NUL`. If `gateway_auth_header=x-api-key`, swap the auth header line for
+`-H 'x-api-key: <token>'`.)
+
+`gateway_api_format=anthropic` (default):
 ```bash
-# Windows: swap /dev/null for NUL
-# If gateway_auth_header=authorization, swap the -H line for:
-#   -H 'authorization: Bearer <token>'
 curl -s -o /dev/null -w '%{http_code}\n' "<gateway_url>/v1/messages" \
-  -H 'content-type: application/json' -H 'x-api-key: <token>' \
+  -H 'content-type: application/json' -H 'authorization: Bearer <token>' \
   -d '{"model":"claude-sonnet-4-5","max_tokens":1,"messages":[{"role":"user","content":"hi"}]}'
+```
+
+`gateway_api_format=bedrock` — model goes in the path, **not** the body:
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' \
+  "<gateway_url>/model/anthropic.claude-sonnet-4-5-v1:0/invoke" \
+  -H 'content-type: application/json' -H 'authorization: Bearer <token>' \
+  -d '{"anthropic_version":"bedrock-2023-05-31","max_tokens":1,"messages":[{"role":"user","content":"hi"}]}'
+```
+
+`gateway_api_format=vertex` — model, project, and region all go in the path:
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' \
+  "<gateway_url>/projects/<gcp_project_id>/locations/<gcp_region>/publishers/anthropic/models/claude-sonnet-4-5:rawPredict" \
+  -H 'content-type: application/json' -H 'authorization: Bearer <token>' \
+  -d '{"anthropic_version":"vertex-2023-10-16","max_tokens":1,"messages":[{"role":"user","content":"hi"}]}'
 ```
 
 **Vertex:** model enablement is click-ops — the EULA accept has no API. Open
