@@ -28,6 +28,10 @@
       "type": "http",
       "url": "https://mcp-pub.aiera.com"
     },
+    "bigdata.com": {
+      "type": "http",
+      "url": "https://mcp.bigdata.com"
+    },
     "lseg": {
       "type": "http",
       "url": "https://api.analytics.lseg.com/lfa/mcp"

@@ -25,7 +25,7 @@ description: |
 
 **ALWAYS follow this data source hierarchy:**
 
-1. **FIRST: Check for MCP data sources** - If S&P Kensho MCP, FactSet MCP, or Daloopa MCP are available, use them exclusively for financial and trading information
+1. **FIRST: Check for MCP data sources** - If S&P Kensho MCP, FactSet MCP, Daloopa MCP, or Bigdata MCP are available, use them exclusively for financial and trading information
 2. **DO NOT use web search** if the above MCP data sources are available
 3. **ONLY if MCPs are unavailable:** Then use Bloomberg Terminal, SEC EDGAR filings, or other institutional sources
 4. **NEVER use web search as a primary data source** - it lacks the accuracy, audit trails, and reliability required for institutional-grade analysis
@@ -269,10 +269,10 @@ Same structure as operating section: Max, 75th, Median, 25th, Min for every metr
 ### Required Components
 
 **Data Sources & Quality:**
-- Where did the data come from? (S&P Kensho MCP, FactSet MCP, Daloopa MCP, Bloomberg, SEC filings)
+- Where did the data come from? (S&P Kensho MCP, FactSet MCP, Daloopa MCP, Bigdata MCP, Bloomberg, SEC filings)
 - What period does it cover? (Q4 2024, audited figures)
 - How was it verified? (Cross-checked against 10-K/10-Q)
-- Note: Prioritize MCP data sources (S&P Kensho, FactSet, Daloopa) if available for better accuracy and traceability
+- Note: Prioritize MCP data sources (S&P Kensho, FactSet, Daloopa, Bigdata) if available for better accuracy and traceability
 
 **Key Definitions:**
 - EBITDA calculation method (Gross Profit + D&A, or Operating Income + D&A)
@@ -440,7 +440,7 @@ This helps answer: "Is our target company trading rich or cheap vs. peers?"
    - Lock in units and date references
 
 2. **Gather data** (60-90 minutes)
-   - Pull from primary sources (S&P Kensho MCP, FactSet MCP, Daloopa MCP if available; otherwise Bloomberg, SEC)
+   - Pull from primary sources (S&P Kensho MCP, FactSet MCP, Daloopa MCP, Bigdata MCP if available; otherwise Bloomberg, SEC)
    - Input all raw numbers in blue
    - Document sources in notes section
 

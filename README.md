@@ -30,13 +30,13 @@ Start with **financial analysis** — the core plugin that provides shared model
 
 | Plugin | Type | How it helps | Connectors |
 |--------|------|-------------|------------|
-| **[financial analysis](./financial-analysis)** | Core (install first) | Build comps, DCF models, LBO models, and 3-statement financials. QC presentations and create reusable PPT templates. Provides the shared foundation and all data connectors. | Daloopa, Morningstar, S&P Global, FactSet, Moody's, MT Newswires, Aiera, LSEG, PitchBook, Chronograph, Egnyte |
+| **[financial analysis](./financial-analysis)** | Core (install first) | Build comps, DCF models, LBO models, and 3-statement financials. QC presentations and create reusable PPT templates. Provides the shared foundation and all data connectors. | Daloopa, Morningstar, S&P Global, FactSet, Moody's, MT Newswires, Aiera, Bigdata.com, LSEG, PitchBook, Chronograph, Egnyte |
 | **[investment banking](./investment-banking)** | Add-on | Draft CIMs, teasers, and process letters. Build buyer lists, run merger models, create strip profiles, and track live deals through milestones. | — |
 | **[equity research](./equity-research)** | Add-on | Write earnings updates and initiating coverage reports. Maintain investment theses, track catalysts, draft morning notes, and screen for new ideas. | — |
 | **[private equity](./private-equity)** | Add-on | Source and screen deals, run due diligence checklists, analyze unit economics and returns, draft IC memos, and monitor portfolio company KPIs. | — |
 | **[wealth management](./wealth-management)** | Add-on | Prep for client meetings, build financial plans, rebalance portfolios, generate client reports, and identify tax-loss harvesting opportunities. | — |
 
-**41 skills, 38 commands, 11 MCP integrations**
+**41 skills, 38 commands, 12 MCP integrations**
 
 Install these directly from Cowork, browse the full collection here on GitHub, or build your own.
 
@@ -127,6 +127,7 @@ All connectors are centralized in the **financial analysis** core plugin and sha
 | [Moody's](https://www.moodys.com/) | `https://api.moodys.com/genai-ready-data/m1/mcp` |
 | [MT Newswires](https://www.mtnewswires.com/) | `https://vast-mcp.blueskyapi.com/mtnewswires` |
 | [Aiera](https://www.aiera.com/) | `https://mcp-pub.aiera.com` |
+| [Bigdata.com](https://www.ravenpack.com/) | `https://mcp.bigdata.com` |
 | [LSEG](https://www.lseg.com/) | `https://api.analytics.lseg.com/lfa/mcp` |
 | [PitchBook](https://pitchbook.com/) | `https://premium.mcp.pitchbook.com/mcp` |
 | [Chronograph](https://www.chronograph.pe/) | `https://ai.chronograph.pe/mcp` |
