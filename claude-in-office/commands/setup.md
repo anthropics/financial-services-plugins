@@ -186,9 +186,8 @@ the pass-through path, e.g. `https://litellm.acme.com/bedrock` or
 **Auth header scheme.** The add-in sends the token as `x-api-key: <token>` by
 default — this is what LiteLLM, Portkey, and Kong accept out of the box. If
 your gateway expects `Authorization: Bearer <token>` instead (common for
-custom/enterprise gateways), set `gateway_auth_header=authorization`. The
-value is case-sensitive lowercase; anything else silently falls back to
-`x-api-key`. If you're unsure, run the Step 6 smoke test with `x-api-key`
+custom/enterprise gateways), set `gateway_auth_header=authorization`. If
+you're unsure, run the Step 6 smoke test with `x-api-key`
 first — a 401 with "no Authorization header" in your gateway logs means you
 need `authorization`.
 
