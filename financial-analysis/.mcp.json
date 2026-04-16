@@ -20,21 +20,9 @@
       "type": "http",
       "url": "https://api.moodys.com/genai-ready-data/m1/mcp"
     },
-    "mtnewswire": {
-      "type": "http",
-      "url": "https://vast-mcp.blueskyapi.com/mtnewswires"
-    },
-    "aiera": {
-      "type": "http",
-      "url": "https://mcp-pub.aiera.com"
-    },
     "lseg": {
       "type": "http",
-      "url": "https://api.analytics.lseg.com/lfa/mcp"
-    },
-    "pitchbook": {
-      "type": "http",
-      "url": "https://premium.mcp.pitchbook.com/mcp"
+      "url": "https://api.analytics.lseg.com/lfa/mcp/server-cl"
     },
     "chronograph": {
       "type": "http",
