@@ -175,6 +175,20 @@ uses the standard `key1=value1,key2=value2` format and interpolates like any
 other value. The collector must allow CORS from the add-in origin — see
 [above](#cors--every-url-needs-it).
 
+### `inference_headers`
+
+```json
+"inference_headers": { "x-application-id": "app123" }
+```
+
+Extra HTTP headers attached to every request the add-in sends to your gateway
+(`gateway_url`) — typically accounting tags the gateway uses for cost
+allocation. Applies only to gateway deployments; direct cloud connections
+ignore it. The add-in treats them as opaque pass-through; `Authorization`,
+`x-api-key`,
+`Content-Type`, `Host`, `Content-Length`, `User-Agent`, `Cookie`, and any
+`anthropic-*` / `x-amz-*` / `x-goog-*` header are reserved and dropped.
+
 ### `mcp_servers`
 
 Array of MCP servers the add-in connects to for this user.

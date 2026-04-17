@@ -39,6 +39,7 @@ const KEYS = {
   gateway_auth_header: { pattern: /^(x-api-key|authorization)$/i, hint: "auth header scheme (default: x-api-key)" },
   gateway_api_format: { pattern: /^(anthropic|bedrock|vertex)$/i, hint: "anthropic | bedrock | vertex" },
   mcp_servers: { pattern: /^\[.*\]$/, hint: "JSON array of {url, label, headers?, discover?}" },
+  inference_headers: { pattern: /^\{.*\}$/, hint: "JSON object of extra headers to attach to every model request" },
   bootstrap_url: { pattern: /^https:\/\//, hint: "HTTPS endpoint returning per-user config" },
   otlp_endpoint: { pattern: /^https:\/\//, hint: "OTLP/HTTP traces collector URL" },
   otlp_headers: { pattern: /./, hint: "comma-separated k=v pairs for the OTLP exporter" },

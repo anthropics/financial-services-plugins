@@ -76,6 +76,26 @@ browser WebView). Leave it unset and no custom collector is configured.
 Setting these here applies one collector org-wide; per-user routing belongs in
 [bootstrap](bootstrap.md#telemetry) or extension attrs.
 
+## Inference headers
+
+`inference_headers` is a JSON object of extra HTTP headers the add-in attaches
+to every request it sends to your gateway (`gateway_url`). Use it for
+accounting or cost-allocation tags your gateway expects — e.g., an internal
+application ID — so you don't need a header-injecting proxy in front of it.
+Applies only when using a gateway; direct cloud connections ignore it.
+
+```bash
+inference_headers='{"x-application-id":"app123"}'
+```
+
+The add-in treats the values as opaque. `Authorization`, `x-api-key`,
+`Content-Type`, `Host`, `Content-Length`, `User-Agent`, `Cookie`, and any
+`anthropic-*` / `x-amz-*` / `x-goog-*` header are reserved and silently dropped
+— they carry the add-in's own auth and protocol negotiation.
+
+Setting it here applies one header set org-wide; per-user values belong in
+[bootstrap](bootstrap.md#inference_headers).
+
 ## Auto-connect
 
 Default: when all fields for a provider are set, users skip the connection form
