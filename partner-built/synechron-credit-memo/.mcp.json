@@ -1,0 +1,70 @@
+{
+  "mcpServers": {
+    "sec-edgar": {
+      "type": "http",
+      "url": "https://data.sec.gov",
+      "description": "SEC EDGAR — Official 10-K, 10-Q, 8-K regulatory filings. IMPORTANT: The SEC_EDGAR_KEY in config.local.md is NOT a traditional API key. It is a courtesy User-Agent string in the format 'OrganizationName contact@email.com'. Set it as the User-Agent header on all EDGAR requests. Without a valid User-Agent: 10 req/sec limit. With a valid User-Agent: higher limits and full-text search access.",
+      "endpoints": {
+        "full_text_search": "https://efts.sec.gov/LATEST/search-index?q={company}&forms=10-K,10-Q,8-K&dateRange=custom&startdt={start_year}-01-01&enddt={end_year}-12-31",
+        "company_search": "https://www.sec.gov/cgi-bin/browse-edgar?company={company}&CIK=&type=10-K&dateb=&owner=include&count=10&search_text=&action=getcompany",
+        "submissions": "https://data.sec.gov/submissions/CIK{cik_padded}.json"
+      },
+      "auth": "User-Agent header — set to value of SEC_EDGAR_KEY from config.local.md",
+      "terms_of_service": "https://www.sec.gov/privacy.htm — Public access; User-Agent required as per SEC fair access guidelines."
+    },
+    "serpapi": {
+      "type": "http",
+      "url": "https://serpapi.com",
+      "description": "SerpApi — Authenticated Google/Bing search API. API key from SERPAPI_KEY in config.local.md. Append &api_key={SERPAPI_KEY} to all calls. Unlocks Google Finance, Google News, Scholar endpoints.",
+      "endpoints": {
+        "google_search": "https://serpapi.com/search?engine=google&q={query}&api_key={SERPAPI_KEY}",
+        "google_finance": "https://serpapi.com/search?engine=google_finance&q={ticker}&api_key={SERPAPI_KEY}",
+        "google_news": "https://serpapi.com/search?engine=google_news&q={query}&api_key={SERPAPI_KEY}",
+        "yahoo_finance": "https://serpapi.com/search?engine=yahoo_finance&q={ticker}&api_key={SERPAPI_KEY}"
+      },
+      "auth": "SERPAPI_KEY query parameter from config.local.md",
+      "terms_of_service": "https://serpapi.com/terms — Licensed API access; usage subject to SerpApi subscription terms."
+    },
+    "stock-analysis": {
+      "type": "http",
+      "url": "https://stockanalysis.com",
+      "description": "Stock Analysis — Structured financials, ratios, 5-year history. Public web access.",
+      "endpoints": {
+        "financials": "https://stockanalysis.com/stocks/{ticker}/financials/",
+        "balance_sheet": "https://stockanalysis.com/stocks/{ticker}/financials/balance-sheet/",
+        "cash_flow": "https://stockanalysis.com/stocks/{ticker}/financials/cash-flow-statement/",
+        "ratios": "https://stockanalysis.com/stocks/{ticker}/financials/ratios/"
+      },
+      "terms_of_service_note": "Web access for informational purposes. Verify compliance with stockanalysis.com Terms of Service before automated use in production."
+    },
+    "discoverci": {
+      "type": "http",
+      "url": "https://discoverci.com",
+      "description": "DiscoverCI — Company intelligence, segments, competitors. Public web access.",
+      "endpoints": {
+        "company": "https://discoverci.com/companies/{company}"
+      },
+      "terms_of_service_note": "Web access for informational purposes. Verify compliance with discoverci.com Terms of Service before automated use in production."
+    },
+    "macrotrends": {
+      "type": "http",
+      "url": "https://www.macrotrends.net",
+      "description": "Macrotrends — 10-year historical financials and industry benchmarks. Public web access.",
+      "endpoints": {
+        "revenue": "https://www.macrotrends.net/stocks/charts/{ticker}/{company}/revenue",
+        "profit_margin": "https://www.macrotrends.net/stocks/charts/{ticker}/{company}/profit-margins",
+        "pe_ratio": "https://www.macrotrends.net/stocks/charts/{ticker}/{company}/pe-ratio"
+      },
+      "terms_of_service_note": "Web access for informational purposes. Verify compliance with macrotrends.net Terms of Service before automated use in production."
+    },
+    "spherical-insights": {
+      "type": "http",
+      "url": "https://www.sphericalinsights.com",
+      "description": "Spherical Insights — Market size, CAGR, industry forecasts. Public web access.",
+      "endpoints": {
+        "search": "https://www.sphericalinsights.com/search/{industry}"
+      },
+      "terms_of_service_note": "Web access for informational purposes. Verify compliance with sphericalinsights.com Terms of Service before automated use in production."
+    }
+  }
+}

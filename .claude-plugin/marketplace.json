@@ -43,6 +43,12 @@
       "name": "claude-in-office",
       "source": "./claude-in-office",
       "description": "Provision direct cloud access (Vertex AI, Bedrock, or LLM gateway) for the Claude Office add-in. Generates the customized manifest, walks through Azure admin consent, and writes per-user config via Graph extension attributes."
+    },
+    {
+      "name": "credit-memo",
+      "source": "./partner-built/synechron-credit-memo",
+      "description": "Generate comprehensive Credit Memorandums for commercial lending. Collects financial data from SEC EDGAR, SerpApi, and public sources. Analyzes borrower financials, credit risk, repayment capacity, industry position, and management quality. Outputs Word, PDF, and PowerPoint with embedded charts. Built by Synechron Technologies."
     }
+
   ]
 }
