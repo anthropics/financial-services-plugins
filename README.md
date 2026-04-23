@@ -36,7 +36,7 @@ Start with **financial analysis** — the core plugin that provides shared model
 | **[private equity](./private-equity)** | Add-on | Source and screen deals, run due diligence checklists, analyze unit economics and returns, draft IC memos, and monitor portfolio company KPIs. | — |
 | **[wealth management](./wealth-management)** | Add-on | Prep for client meetings, build financial plans, rebalance portfolios, generate client reports, and identify tax-loss harvesting opportunities. | — |
 
-**41 skills, 38 commands, 11 MCP integrations**
+**49 skills, 46 commands, 12 MCP integrations**
 
 Install these directly from Cowork, browse the full collection here on GitHub, or build your own.
 
@@ -48,6 +48,7 @@ These plugins are built and maintained by our data partners, bringing their fina
 |--------|---------|-------------|
 | **[LSEG](./partner-built/lseg)** | [LSEG](https://www.lseg.com/) | Price bonds, analyze yield curves, evaluate FX carry trades, value options, and build macro dashboards using LSEG financial data and analytics. 8 commands covering fixed income, FX, equities, and macro. |
 | **[S&P Global](./partner-built/spglobal)** | [S&P Global](https://www.spglobal.com/) | Generate company tearsheets, earnings previews, and funding digests powered by S&P Capital IQ data. Supports multiple audience types (equity research, IB/M&A, corp dev, sales). |
+| **[FinBrain](./partner-built/finbrain)** | [FinBrain](https://finbrain.tech/) | Government & Regulatory alternative data — Congressional trades, corporate lobbying, federal contract awards — plus news sentiment, LinkedIn / app-store / Reddit consumer signals, and insider trading. 8 commands covering cross-ticker screens and per-company deep dives. |
 
 ### Office Add-in Deployment
 
@@ -131,6 +132,7 @@ All connectors are centralized in the **financial analysis** core plugin and sha
 | [PitchBook](https://pitchbook.com/) | `https://premium.mcp.pitchbook.com/mcp` |
 | [Chronograph](https://www.chronograph.pe/) | `https://ai.chronograph.pe/mcp` |
 | [Egnyte](https://www.egnyte.com/) | `https://mcp-server.egnyte.com/mcp` |
+| [FinBrain](https://finbrain.tech/) | local stdio via `finbrain-mcp` PyPI package (partner-built plugin) |
 
 > MCP access may require a subscription or API key from the respective provider.
 

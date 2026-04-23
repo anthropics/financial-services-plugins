@@ -40,6 +40,11 @@
       "description": "S&P Global - Financial data and analytics skills including company tearsheets, earnings previews, and transaction summaries"
     },
     {
+      "name": "finbrain",
+      "source": "./partner-built/finbrain",
+      "description": "FinBrain alternative data: Congressional trades, corporate lobbying, and federal contract awards (Government & Regulatory bundle), plus news sentiment, LinkedIn / app-store / Reddit signals, and insider trading."
+    },
+    {
       "name": "claude-in-office",
       "source": "./claude-in-office",
       "description": "Provision direct cloud access (Vertex AI, Bedrock, or LLM gateway) for the Claude Office add-in. Generates the customized manifest, walks through Azure admin consent, and writes per-user config via Graph extension attributes."
