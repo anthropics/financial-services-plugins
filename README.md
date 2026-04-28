@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/anthropics-financial-services-plugins-badge.png)](https://mseep.ai/app/anthropics-financial-services-plugins)
+
 # Claude for Financial Services Plugins
 
 Plugins that turn Claude into a specialist for financial services — investment banking, equity research, private equity, and wealth management. Built for [Claude Cowork](https://claude.com/product/cowork), also compatible with [Claude Code](https://claude.com/product/claude-code).
