@@ -133,7 +133,7 @@ With `entra_sso=1`, validate the JWT before trusting it:
 
 | Claim | Check |
 |---|---|
-| `aud` | `c2995f31-11e7-4882-b7a7-ef9def0a0266` — the add-in's app ID. Anything else means the token wasn't minted for this. |
+| `aud` | `c2995f31-11e7-4882-b7a7-ef9def0a0266` — the add-in's default app ID, or your own app's GUID if you set `graph_client_id` in the [manifest](manifest.md#entra-sso). Anything else means the token wasn't minted for this. |
 | `iss` | `https://login.microsoftonline.com/<YOUR_TENANT_ID>/v2.0` — your tenant. Reject other tenants. |
 | `exp` | Not expired. Libraries handle this; don't hand-roll it. |
 | `oid` | The user's stable object ID. This is your lookup key — email (`upn`/`preferred_username`) can change, `oid` doesn't. |
