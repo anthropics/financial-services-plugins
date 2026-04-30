@@ -1,0 +1,24 @@
+{
+  "name": "finbrain",
+  "version": "0.1.0",
+  "description": "FinBrain alternative data for Claude — Congressional trades, corporate lobbying, and federal contracts (Government & Regulatory bundle), plus news sentiment, LinkedIn / app-store / Reddit consumer signals, and insider trading.",
+  "author": {
+    "name": "FinBrain Technologies",
+    "email": "info@finbrain.tech"
+  },
+  "homepage": "https://finbrain.tech",
+  "repository": "https://github.com/ahmetsbilgin/finbrain-mcp",
+  "license": "MIT",
+  "keywords": [
+    "finbrain",
+    "alternative-data",
+    "congressional-trades",
+    "corporate-lobbying",
+    "government-contracts",
+    "insider-trading",
+    "news-sentiment",
+    "linkedin-metrics",
+    "reddit-mentions",
+    "app-ratings"
+  ]
+}

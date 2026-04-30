@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "finbrain": {
+      "command": "finbrain-mcp",
+      "env": {
+        "FINBRAIN_API_KEY": "${FINBRAIN_API_KEY}"
+      }
+    }
+  }
+}
