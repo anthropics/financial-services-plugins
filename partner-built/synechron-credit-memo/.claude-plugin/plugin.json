@@ -1,0 +1,11 @@
+{
+  "name": "credit-memo",
+  "description": "Generate comprehensive Credit Memorandums for commercial lending. Collects 3–5 years of financial data from SEC EDGAR, SerpApi, and public sources. Analyzes borrower financials, credit risk, repayment capacity, industry position, and management quality. Outputs Word, PDF, and PowerPoint with 10 embedded charts. Supports public and private companies with a 5-layer guardrails system.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Synechron Technologies",
+    "url": "https://www.synechron.com"
+  },
+  "repository": "https://github.com/anthropic-plugin/financial-services-plugins",
+  "license": "Apache-2.0"
+}
