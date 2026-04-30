@@ -53,8 +53,11 @@ requests an *access token* for that scope instead. The Bearer it sends carries
 `aud` = your API's App ID URI and `scp` = the granted scope. In Entra, on your
 app registration: **Expose an API** (Application ID URI `api://<guid>`), add a
 scope such as `access_as_user`, and grant the same app delegated permission to
-it, then grant admin consent for the tenant. `/.default` (requests all
-consented scopes) also works.
+it, then grant admin consent for the tenant. In the app manifest, set
+`accessTokenAcceptedVersion: 2` so the issued token uses v2.0 claims
+(`iss = login.microsoftonline.com/<tid>/v2.0`, `azp`, `preferred_username`);
+leave it unset and you get v1.0 tokens, which your validator may reject.
+`/.default` (requests all consented scopes) also works.
 
 `entra_scope` requires `graph_client_id` — the build script enforces this. Both
 are manifest-only: the add-in needs them to initialize NAA *before* it can read
