@@ -49,13 +49,17 @@ const KEYS = {
   },
   auto_connect: { pattern: /^[01]$/, hint: "0 shows form, 1 (or omit) auto-connects" },
   entra_sso: { pattern: /^[01]$/, hint: "1 enables Entra SSO (required for aws_role_arn)" },
+  graph_client_id: {
+    pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    hint: "your Entra app registration's Application (client) ID — overrides the default multi-tenant app",
+  },
   allow_1p: {
     pattern: /^[01]$/,
     hint: "1 allows Claude.ai OAuth alongside 3P (default: locked when other keys present)",
   },
 };
 
-const NEEDS_ENTRA = ["aws_role_arn"];
+const NEEDS_ENTRA = ["aws_role_arn", "graph_client_id"];
 
 async function main() {
   const [out, ...pairs] = process.argv.slice(2);

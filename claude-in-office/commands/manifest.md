@@ -36,6 +36,18 @@ If you don't need Entra — static gateway config, Vertex with Google OAuth —
 leave it off. Users won't see a Microsoft prompt for a setup that doesn't
 involve Microsoft.
 
+**Bring your own Entra app.** By default the token is requested as Anthropic's
+multi-tenant app (`c2995f31-…`), so its `aud` claim is that GUID. If your
+bootstrap endpoint or token-exchange service requires `aud` to match an app
+registered in *your* tenant, set `graph_client_id=<your-app-guid>`. Register
+the app in Entra as a single-tenant **Single-page application** with redirect
+URI `https://pivot.claude.ai/msal-redirect.html`. You handle consent on your
+own app — [consent](consent.md) covers the default app only.
+
+`graph_client_id` is manifest-only — the add-in needs it to initialize NAA
+*before* it can read extension attrs or call your bootstrap endpoint, so it
+can't arrive through either of those layers.
+
 ## Bootstrap endpoint
 
 `bootstrap_url` points to an HTTPS endpoint you host. At startup the add-in
