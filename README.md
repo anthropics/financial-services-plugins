@@ -103,13 +103,15 @@ Every plugin follows the same structure:
 ```
 plugin-name/
 ├── .claude-plugin/plugin.json   # Manifest
-├── .mcp.json                    # Tool connections
+├── .mcp.json                    # Tool connections (optional)
 ├── commands/                    # Slash commands you invoke explicitly
-└── skills/                      # Domain knowledge Claude draws on automatically
+├── hooks/                       # Workflow guardrails and automation
+└── skills/                      # Domain knowledge Claude draws on automatically (optional)
 ```
 
 - **Skills** encode the domain expertise, best practices, and step-by-step workflows Claude needs to deliver professional-quality financial work. Claude draws on them automatically when relevant.
 - **Commands** are explicit actions you trigger (e.g., `/comps`, `/earnings`, `/ic-memo`).
+- **Hooks** provide execution guardrails and workflow automation (for example, enforcing context checks before command execution).
 - **Connectors** wire Claude to the external data sources your workflow depends on — financial data terminals, research platforms, document management, and more — via [MCP servers](https://modelcontextprotocol.io/).
 
 Every component is file-based — markdown and JSON, no code, no infrastructure, no build steps.
